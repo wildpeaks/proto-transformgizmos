@@ -99,19 +99,19 @@ PROTO TransformGizmos [
 		function getTranslationMatrix(translation){
 			var transform = new SFNode('Transform{}');
 			transform.translation = translation;
-			return transform.getMatrix();
+			return new VrmlMatrix(transform.getMatrix());
 		}
 
 		function getRotationMatrix(rotation){
 			var transform = new SFNode('Transform{}');
 			transform.rotation = rotation;
-			return transform.getMatrix();
+			return new VrmlMatrix(transform.getMatrix());
 		}
 
 		function getTranslation(matrix){
 			var transform = new SFNode('Transform{}');
 			transform.setMatrix(matrix);
-			return transform.translation;
+			return new SFVec3f(transform.translation);
 		}
 
 
