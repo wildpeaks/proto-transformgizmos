@@ -1,0 +1,20 @@
+{
+  "name": "@wildpeaks/proto-transformgizmos",
+  "version": "1.0.0",
+  "description": "PROTO TransformGizmos",
+  "main": "src/proto.TransformGizmos.wrl",
+  "files": [
+    "src/proto.TransformGizmos.wrl"
+  ],
+  "repository": "https://github.com/wildpeaks/proto-transformgizmos",
+  "keywords": [
+    "wildpeaks",
+    "vrml"
+  ],
+  "author": "Cecile Muller",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wildpeaks/proto-transformgizmos/issues"
+  },
+  "homepage": "https://github.com/wildpeaks/proto-transformgizmos#readme"
+}
