@@ -1,0 +1,654 @@
+#VRML V2.0 utf8
+
+EXTERNPROTO ThickLine [
+	exposedField  MFVec3f  spine
+	exposedField  SFFloat  thickness
+	exposedField  SFFloat  thicknessTesselation
+	field         SFFloat  creaseAngle
+	field         SFBool   beginCap
+	field         SFBool   endCap
+] "proto.ThickLine.wrl#ThickLine"
+
+EXTERNPROTO Visible [
+	exposedField  SFBool  visible
+	exposedField  MFNode  children
+] "proto.Visible.wrl#Visible"
+
+PROTO TranslateGizmo [
+	exposedField  SFVec3f     translation    0 0 0
+	exposedField  SFRotation  rotation       0 1 0 0
+	exposedField  SFVec3f     scale          1 1 1
+	eventOut      SFTime      dragStart
+	eventOut      SFTime      dragEnd
+	eventOut      SFVec3f     delta_changed
+]{
+	# Translate: single axis
+	DEF selectableX Selection {
+		select TRUE
+		collide FALSE
+		children [
+			DEF touchX TouchSensor {}
+			Transform {
+				translation IS translation
+				rotation IS rotation
+				scale IS scale
+				children [
+					Selection {
+						select FALSE
+						collide FALSE
+						children [
+							Transform {
+								translation 1.1 0 0
+								rotation 0 0 1 -1.57
+								children Shape {
+									appearance Appearance {
+										material DEF coneX Material {
+											diffuseColor 0 0 0
+											emissiveColor 1 0 0
+										}
+									}
+									geometry Cone {
+										bottomRadius 0.05
+										height 0.2
+									}
+								}
+							}
+						]
+					}
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 1 0 0
+								transparency 1
+							}
+						}
+						geometry ThickLine {
+							thickness 0.1
+							spine [0 0 0, 1.2 0 0]
+						}
+					}
+					DEF activeX Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 0 0
+									transparency 1
+								}
+							}
+							geometry Box {
+								size 1000 1000 0.1
+							}
+						}
+					}
+				]
+				ROUTE touchX.isActive TO activeX.visible
+			}
+		]
+	}
+	DEF selectableY Selection {
+		select TRUE
+		collide FALSE
+		children [
+			DEF touchY TouchSensor {}
+			Transform {
+				translation IS translation
+				rotation IS rotation
+				scale IS scale
+				children [
+					Selection {
+						select FALSE
+						collide FALSE
+						children [
+							Transform {
+								translation 0 1.1 0
+								children Shape {
+									appearance Appearance {
+										material DEF coneY Material {
+											diffuseColor 0 0 0
+											emissiveColor 0 1 0
+										}
+									}
+									geometry Cone {
+										bottomRadius 0.05
+										height 0.2
+									}
+								}
+							}
+						]
+					}
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 0 1 0
+								transparency 1
+							}
+						}
+						geometry ThickLine {
+							thickness 0.1
+							spine [0 0 0, 0 1.2 0]
+						}
+					}
+					DEF activeY Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 0 1 0
+									transparency 1
+								}
+							}
+							geometry Box {
+								size 1000 1000 0.1
+							}
+						}
+					}
+				]
+				ROUTE touchY.isActive TO activeY.visible
+			}
+		]
+	}
+	DEF selectableZ Selection {
+		select TRUE
+		collide FALSE
+		children [
+			DEF touchZ TouchSensor {}
+			Transform {
+				translation IS translation
+				rotation IS rotation
+				scale IS scale
+				children [
+					Selection {
+						select FALSE
+						collide FALSE
+						children [
+							Transform {
+								translation 0 0 1.1
+								rotation 1 0 0 1.57
+								children Shape {
+									appearance Appearance {
+										material DEF coneZ Material {
+											diffuseColor 0 0 0
+											emissiveColor 0 0 1
+										}
+									}
+									geometry Cone {
+										bottomRadius 0.05
+										height 0.2
+									}
+								}
+							}
+						]
+					}
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 0 0 1
+								transparency 1
+							}
+						}
+						geometry ThickLine {
+							thickness 0.1
+							spine [0 0 0, 0 0 1.2]
+						}
+					}
+					DEF activeZ Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 0 0 1
+									transparency 1
+								}
+							}
+							geometry Box {
+								size 1000 0.1 1000
+							}
+						}
+					}
+				]
+				ROUTE touchZ.isActive TO activeZ.visible
+			}
+		]
+	}
+
+	# Translate: 2D plane
+	DEF selectableXY Selection {
+		select TRUE
+		collide FALSE
+		children [
+			DEF touchXY TouchSensor {}
+			Transform {
+				translation IS translation
+				rotation IS rotation
+				scale IS scale
+				children [
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 1 1 0
+								transparency 1
+							}
+						}
+						geometry IndexedFaceSet {
+							solid FALSE
+							coord Coordinate {point [0 0 0, 0 0.5 0, 0.5 0.5 0, 0.5 0 0]}
+							coordIndex [0 3 2 1 0 -1]
+						}
+					}
+					DEF hoverXY Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 0.5
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [0 0 0, 0 0.5 0, 0.5 0.5 0, 0.5 0 0]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+					DEF activeXY Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 1
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [-2000 -2000 0, -2000 2000 0, 2000 2000 0, 2000 -2000 0]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+				]
+				ROUTE touchXY.isOver TO hoverXY.visible
+				ROUTE touchXY.isActive TO activeXY.visible
+			}
+		]
+	}
+	DEF selectableXZ Selection {
+		select TRUE
+		collide FALSE
+		children [
+			DEF touchXZ TouchSensor {}
+			Transform {
+				translation IS translation
+				rotation IS rotation
+				scale IS scale
+				children [
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 1 1 0
+								transparency 1
+							}
+						}
+						geometry IndexedFaceSet {
+							solid FALSE
+							coord Coordinate {point [0 0 0, 0.5 0 0, 0.5 0 0.5, 0 0 0.5]}
+							coordIndex [0 3 2 1 0 -1]
+						}
+					}
+					DEF hoverXZ Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 0.5
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [0 0 0, 0.5 0 0, 0.5 0 0.5, 0 0 0.5]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+					DEF activeXZ Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 1
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [-2000 0 -2000, 2000 0 -2000, 2000 0 2000, -2000 0 2000]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+				]
+				ROUTE touchXZ.isOver TO hoverXZ.visible
+				ROUTE touchXZ.isActive TO activeXZ.visible
+			}
+		]
+	}
+	DEF selectableYZ Selection {
+		select TRUE
+		collide FALSE
+		children [
+			DEF touchYZ TouchSensor {}
+			Transform {
+				translation IS translation
+				rotation IS rotation
+				scale IS scale
+				children [
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 1 1 0
+								transparency 1
+							}
+						}
+						geometry IndexedFaceSet {
+							solid FALSE
+							coord Coordinate {point [0 0 0, 0 0.5 0, 0 0.5 0.5, 0 0 0.5]}
+							coordIndex [0 3 2 1 0 -1]
+						}
+					}
+					DEF hoverYZ Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 0.5
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [0 0 0, 0 0.5 0, 0 0.5 0.5, 0 0 0.5]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+					DEF activeYZ Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 1
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [0 -2000 -2000, 0 2000 -2000, 0 2000 2000, 0 -2000 2000]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+				]
+				ROUTE touchYZ.isOver TO hoverYZ.visible
+				ROUTE touchYZ.isActive TO activeYZ.visible
+			}
+		]
+	}
+
+	# Lines
+	Selection {
+		select FALSE
+		collide FALSE
+		children Transform {
+			translation IS translation
+			rotation IS rotation
+			scale IS scale
+			children Shape {
+				appearance Appearance {
+					material Material {
+						diffuseColor 0 0 0
+						emissiveColor 0 0 0
+					}
+				}
+				geometry DEF lines IndexedLineSet {
+					coord Coordinate {point [0 0 0, 1 0 0, 0 1 0, 0 0 1, 0.5 0 0, 0 0.5 0, 0 0 0.5, 0.5 0 0.5, 0.5 0.5 0, 0 0.5 0.5]}
+					color Color {color [1 0 0, 0 1 0, 0 0 1, 1 1 0]}
+					coordIndex [0 1 -1, 0 2 -1, 0 3 -1, 4 8 -1, 8 5 -1, 5 9 -1, 9 6 -1, 6 7 -1, 7 4 -1]
+					colorIndex [0 0 -1, 1 1 -1, 2 2 -1, 0 0 -1, 1 1 -1, 1 1 -1, 2 2 -1, 2 2 -1, 0 0 -1]
+				}
+			}
+		}
+	}
+
+	DEF script Script {
+		field         SFColor  RED             1 0 0
+		field         SFColor  GREEN           0 1 0
+		field         SFColor  BLUE            0 0 1
+		field         SFColor  YELLOW          1 1 0
+		field         MFInt32  COLORS_DEFAULT  [0 0 -1, 1 1 -1, 2 2 -1, 0 0 -1, 1 1 -1, 1 1 -1, 2 2 -1, 2 2 -1, 0 0 -1]
+		field         MFInt32  COLORS_X        [3 3 -1, 1 1 -1, 2 2 -1, 0 0 -1, 1 1 -1, 1 1 -1, 2 2 -1, 2 2 -1, 0 0 -1]
+		field         MFInt32  COLORS_Y        [0 0 -1, 3 3 -1, 2 2 -1, 0 0 -1, 1 1 -1, 1 1 -1, 2 2 -1, 2 2 -1, 0 0 -1]
+		field         MFInt32  COLORS_Z        [0 0 -1, 1 1 -1, 3 3 -1, 0 0 -1, 1 1 -1, 1 1 -1, 2 2 -1, 2 2 -1, 0 0 -1]
+		field         MFInt32  COLORS_XY       [3 3 -1, 3 3 -1, 2 2 -1, 3 3 -1, 3 3 -1, 1 1 -1, 2 2 -1, 2 2 -1, 0 0 -1]
+		field         MFInt32  COLORS_YZ       [0 0 -1, 3 3 -1, 3 3 -1, 0 0 -1, 1 1 -1, 3 3 -1, 3 3 -1, 2 2 -1, 0 0 -1]
+		field         MFInt32  COLORS_XZ       [3 3 -1, 1 1 -1, 3 3 -1, 0 0 -1, 1 1 -1, 1 1 -1, 2 2 -1, 3 3 -1, 3 3 -1]
+
+		exposedField  SFBool   hoverX          FALSE
+		exposedField  SFBool   hoverY          FALSE
+		exposedField  SFBool   hoverZ          FALSE
+		exposedField  SFBool   hoverXY         FALSE
+		exposedField  SFBool   hoverXZ         FALSE
+		exposedField  SFBool   hoverYZ         FALSE
+
+		exposedField  SFBool   activeX         FALSE
+		exposedField  SFBool   activeY         FALSE
+		exposedField  SFBool   activeZ         FALSE
+		exposedField  SFBool   activeXY        FALSE
+		exposedField  SFBool   activeXZ        FALSE
+		exposedField  SFBool   activeYZ        FALSE
+
+		exposedField  SFVec3f  hitpointX       0 0 0
+		exposedField  SFVec3f  hitpointY       0 0 0
+		exposedField  SFVec3f  hitpointZ       0 0 0
+		exposedField  SFVec3f  hitpointXY      0 0 0
+		exposedField  SFVec3f  hitpointXZ      0 0 0
+		exposedField  SFVec3f  hitpointYZ      0 0 0
+
+		field         SFNode   selectableX     USE selectableX
+		field         SFNode   selectableY     USE selectableY
+		field         SFNode   selectableZ     USE selectableZ
+		field         SFNode   selectableXY    USE selectableXY
+		field         SFNode   selectableXZ    USE selectableXZ
+		field         SFNode   selectableYZ    USE selectableYZ
+
+		field         SFNode   lines           USE lines
+		field         SFNode   coneX           USE coneX
+		field         SFNode   coneY           USE coneY
+		field         SFNode   coneZ           USE coneZ
+
+		field         SFVec3f  startFrom       0 0 0
+		field         SFInt32  waitUntil       -1
+
+		eventOut      SFTime   dragStart       IS dragStart
+		eventOut      SFTime   dragEnd         IS dragEnd
+		eventOut      SFVec3f  delta_changed   IS delta_changed
+
+		directOutput TRUE
+		url "javascript:
+
+
+		function refreshColors(){
+			if (hoverX) lines.colorIndex = COLORS_X;
+			else if (hoverY) lines.colorIndex = COLORS_Y;
+			else if (hoverZ) lines.colorIndex = COLORS_Z;
+			else if (hoverXY) lines.colorIndex = COLORS_XY;
+			else if (hoverXZ) lines.colorIndex = COLORS_XZ;
+			else if (hoverYZ) lines.colorIndex = COLORS_YZ;
+			else lines.colorIndex = COLORS_DEFAULT;
+
+			coneX.emissiveColor = (hoverX || hoverXY || hoverXZ) ? YELLOW : RED;
+			coneY.emissiveColor = (hoverY || hoverXY || hoverYZ) ? YELLOW : GREEN;
+			coneZ.emissiveColor = (hoverZ || hoverXZ || hoverYZ) ? YELLOW : BLUE;
+		}
+
+		function hoverX(){refreshColors();}
+		function hoverY(){refreshColors();}
+		function hoverZ(){refreshColors();}
+		function hoverXY(){refreshColors();}
+		function hoverXZ(){refreshColors();}
+		function hoverYZ(){refreshColors();}
+
+
+		function setVisible(until, x, y, z, xy, xz, yz){
+			waitUntil = until;
+			selectableX.select = x;
+			selectableY.select = y;
+			selectableZ.select = z;
+			selectableXY.select = xy;
+			selectableXZ.select = xz;
+			selectableYZ.select = yz;
+		}
+
+
+		function activeX(){
+			if (activeX){
+				startFrom = hitpointX;
+				setVisible(0, true, false, false, false, false, false);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 0){
+				setVisible(-1, true, true, true, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+		function hitpointX(){
+			if (activeX){
+				delta_changed = new SFVec3f(hitpointX[0] - startFrom[0], 0, 0);
+			}
+		}
+
+
+		function activeY(){
+			if (activeY){
+				startFrom = hitpointY;
+				setVisible(1, false, true, false, false, false, false);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 1){
+				setVisible(-1, true, true, true, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+		function hitpointY(){
+			if (activeY){
+				delta_changed = new SFVec3f(0, hitpointY[1] - startFrom[1], 0);
+			}
+		}
+
+
+		function activeZ(){
+			if (activeZ){
+				startFrom = hitpointZ;
+				setVisible(2, false, false, true, false, false, false);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 2){
+				setVisible(-1, true, true, true, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+		function hitpointZ(){
+			if (activeZ){
+				delta_changed = new SFVec3f(0, 0, hitpointZ[2] - startFrom[2]);
+			}
+		}
+
+
+		function activeXY(){
+			if (activeXY){
+				startFrom = hitpointXY;
+				setVisible(3, false, false, false, true, false, false);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 3){
+				setVisible(-1, true, true, true, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+		function hitpointXY(){
+			if (activeXY){
+				delta_changed = new SFVec3f(hitpointXY[0] - startFrom[0], hitpointXY[1] - startFrom[1], 0);
+			}
+		}
+
+
+		function activeXZ(){
+			if (activeXZ){
+				startFrom = hitpointXZ;
+				setVisible(4, false, false, false, false, true, false);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 4){
+				setVisible(-1, true, true, true, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+		function hitpointXZ(){
+			if (activeXZ){
+				delta_changed = new SFVec3f(hitpointXZ[0] - startFrom[0], 0, hitpointXZ[2] - startFrom[2]);
+			}
+		}
+
+
+		function activeYZ(){
+			if (activeYZ){
+				startFrom = hitpointYZ;
+				setVisible(5, false, false, false, false, false, true);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 5){
+				setVisible(-1, true, true, true, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+		function hitpointYZ(){
+			if (activeYZ){
+				delta_changed = new SFVec3f(0, hitpointYZ[1] - startFrom[1], hitpointYZ[2] - startFrom[2]);
+			}
+		}
+
+		"
+	}
+
+	ROUTE touchX.isOver TO script.hoverX
+	ROUTE touchY.isOver TO script.hoverY
+	ROUTE touchZ.isOver TO script.hoverZ
+	ROUTE touchXY.isOver TO script.hoverXY
+	ROUTE touchXZ.isOver TO script.hoverXZ
+	ROUTE touchYZ.isOver TO script.hoverYZ
+
+	ROUTE touchX.isActive TO script.activeX
+	ROUTE touchY.isActive TO script.activeY
+	ROUTE touchZ.isActive TO script.activeZ
+	ROUTE touchXY.isActive TO script.activeXY
+	ROUTE touchXZ.isActive TO script.activeXZ
+	ROUTE touchYZ.isActive TO script.activeYZ
+
+	ROUTE touchX.hitPoint_changed TO script.hitpointX
+	ROUTE touchY.hitPoint_changed TO script.hitpointY
+	ROUTE touchZ.hitPoint_changed TO script.hitpointZ
+	ROUTE touchXY.hitPoint_changed TO script.hitpointXY
+	ROUTE touchXZ.hitPoint_changed TO script.hitpointXZ
+	ROUTE touchYZ.hitPoint_changed TO script.hitpointYZ
+}

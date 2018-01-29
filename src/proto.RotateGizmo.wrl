@@ -1,0 +1,454 @@
+#VRML V2.0 utf8
+
+EXTERNPROTO Arc [
+	exposedField  SFFloat  fromAngle
+	exposedField  SFFloat  toAngle
+	exposedField  SFFloat  radius
+	exposedField  SFFloat  tesselation
+	field         SFBool   solid
+] "proto.Arc.wrl#Arc"
+
+EXTERNPROTO ArcLine [
+	exposedField  SFFloat  fromAngle
+	exposedField  SFFloat  toAngle
+	exposedField  SFFloat  radius
+	exposedField  SFFloat  tesselation
+] "proto.ArcLine.wrl#ArcLine"
+
+EXTERNPROTO ThickCircleLine [
+	exposedField  SFFloat  thickness
+	exposedField  SFFloat  thicknessTesselation
+	exposedField  SFFloat  radius
+	exposedField  SFFloat  radiusTesselation
+	field         SFFloat  creaseAngle
+] "proto.ThickCircleLine.wrl#ThickCircleLine"
+
+EXTERNPROTO Visible [
+	exposedField  SFBool  visible
+	exposedField  MFNode  children
+] "proto.Visible.wrl#Visible"
+
+PROTO RotateGizmo [
+	exposedField  SFVec3f     translation    0 0 0
+	exposedField  SFRotation  rotation       0 1 0 0
+	exposedField  SFVec3f     scale          1 1 1
+	eventOut      SFTime      dragStart
+	eventOut      SFTime      dragEnd
+	eventOut      SFRotation  delta_changed
+]{
+	Transform {
+		translation IS translation
+		rotation IS rotation
+		scale IS scale
+		children [
+			DEF visibleXY Visible {
+				visible TRUE
+				children [
+					DEF sensorXY TouchSensor {}
+					Transform {
+						rotation 1 0 0 1.57
+						children [
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 1 0 0
+										transparency 1
+									}
+								}
+								geometry ThickCircleLine {
+									radius 1
+									thickness 0.15
+									radiusTesselation 64
+									thicknessTesselation 8
+								}
+							}
+						]
+					}
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 1 0 0
+							}
+						}
+						geometry ArcLine {
+							radius 1
+							tesselation 64
+						}
+					}
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 1 0 0
+								transparency 0.5
+							}
+						}
+						geometry DEF arcXY Arc {
+							solid FALSE
+							tesselation 64
+							fromAngle 0
+							toAngle 0
+						}
+					}
+					Selection{
+						select FALSE
+						collide FALSE
+						children DEF hoverXY Visible {
+							visible FALSE
+							children Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 1 0 0
+										transparency 0.8
+									}
+								}
+								geometry Circle {
+									radius 1
+								}
+							}
+						}
+					}
+					DEF activeXY Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 1
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [-2000 -2000 0, -2000 2000 0, 2000 2000 0, 2000 -2000 0]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+				]
+				ROUTE sensorXY.isOver TO hoverXY.visible
+				ROUTE sensorXY.isActive TO activeXY.visible
+			}
+			DEF visibleXZ Visible {
+				visible TRUE
+				children [
+					DEF sensorXZ TouchSensor {}
+					Shape {
+						appearance Appearance {
+							material Material {
+								diffuseColor 0 0 0
+								emissiveColor 0 1 0
+								transparency 1
+							}
+						}
+						geometry ThickCircleLine {
+							radius 1
+							thickness 0.15
+							radiusTesselation 64
+							thicknessTesselation 8
+						}
+					}
+					Transform {
+						rotation 1 0 0 1.57
+						children [
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 0 1 0
+									}
+								}
+								geometry ArcLine {
+									radius 1
+									tesselation 64
+								}
+							}
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 0 1 0
+										transparency 0.5
+									}
+								}
+								geometry DEF arcXZ Arc {
+									solid FALSE
+									tesselation 64
+									fromAngle 0
+									toAngle 0
+								}
+							}
+							Selection {
+								select FALSE
+								collide FALSE
+								children DEF hoverXZ Visible {
+									visible FALSE
+									children Shape {
+										appearance Appearance {
+											material Material {
+												diffuseColor 0 0 0
+												emissiveColor 0 1 0
+												transparency 0.8
+											}
+										}
+										geometry Circle {
+											radius 1
+										}
+									}
+								}
+							}
+						]
+					}
+					DEF activeXZ Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 1
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [-2000 0 -2000, 2000 0 -2000, 2000 0 2000, -2000 0 2000]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+				]
+				ROUTE sensorXZ.isOver TO hoverXZ.visible
+				ROUTE sensorXZ.isActive TO activeXZ.visible
+			}
+			DEF visibleYZ Visible {
+				visible TRUE
+				children [
+					DEF sensorYZ TouchSensor {}
+					Transform {
+						rotation 0 0 1 1.57
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 0 0 1
+									transparency 1
+								}
+							}
+							geometry ThickCircleLine {
+								radius 1
+								thickness 0.15
+								radiusTesselation 64
+								thicknessTesselation 8
+							}
+						}
+					}
+					Transform {
+						rotation 0 1 0 1.57
+						children [
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 0 0 1
+									}
+								}
+								geometry ArcLine {
+									radius 1
+									tesselation 64
+								}
+							}
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 0 0 1
+										transparency 0.8
+									}
+								}
+								geometry DEF arcYZ Arc {
+									solid FALSE
+									tesselation 64
+									fromAngle 0
+									toAngle 0
+								}
+							}
+							Selection {
+								select FALSE
+								collide FALSE
+								children DEF hoverYZ Visible {
+									visible FALSE
+									children Shape {
+										appearance Appearance {
+											material Material {
+												diffuseColor 0 0 0
+												emissiveColor 0 0 1
+												transparency 0.5
+											}
+										}
+										geometry Circle {
+											radius 1
+										}
+									}
+								}
+							}
+						]
+					}
+					DEF activeYZ Visible {
+						visible FALSE
+						children Shape {
+							appearance Appearance {
+								material Material {
+									diffuseColor 0 0 0
+									emissiveColor 1 1 0
+									transparency 1
+								}
+							}
+							geometry IndexedFaceSet {
+								solid FALSE
+								coord Coordinate {point [0 -2000 -2000, 0 2000 -2000, 0 2000 2000, 0 -2000 2000]}
+								coordIndex [0 3 2 1 0 -1]
+							}
+						}
+					}
+				]
+				ROUTE sensorYZ.isOver TO hoverYZ.visible
+				ROUTE sensorYZ.isActive TO activeYZ.visible
+			}
+			Selection {
+				select FALSE
+				collide FALSE
+				children Shape {
+					appearance Appearance {
+						material Material {
+							diffuseColor 0 0 0
+							emissiveColor 0 0 0
+						}
+					}
+					geometry IndexedLineSet {
+						coord Coordinate {point [0.1 0 0, -0.1 0 0,  0 0.1 0, 0 -0.1 0,  0 0 0.1, 0 0 -0.1]}
+						coordIndex [0 1 -1, 2 3 -1, 4 5 -1]
+					}
+				}
+			}
+		]
+	}
+
+	DEF mouse MouseSensor{}
+	DEF script Script {
+		field         SFVec3f     VECTOR_X       1 0 0
+
+		field         SFVec3f     startFrom      0 0 0
+		field         SFInt32     waitUntil      -1
+
+		field         SFNode      mouse          USE mouse
+		field         SFNode      visibleXY      USE visibleXY
+		field         SFNode      visibleXZ      USE visibleXZ
+		field         SFNode      visibleYZ      USE visibleYZ
+		field         SFNode      arcXY          USE arcXY
+		field         SFNode      arcXZ          USE arcXZ
+		field         SFNode      arcYZ          USE arcYZ
+
+		exposedField  SFBool      activeXY       FALSE
+		exposedField  SFBool      activeXZ       FALSE
+		exposedField  SFBool      activeYZ       FALSE
+
+		exposedField  SFVec3f     hitpointXY     0 0 0
+		exposedField  SFVec3f     hitpointXZ     0 0 0
+		exposedField  SFVec3f     hitpointYZ     0 0 0
+
+		eventOut      SFTime      dragStart      IS dragStart
+		eventOut      SFTime      dragEnd        IS dragEnd
+		eventOut      SFRotation  delta_changed  IS delta_changed
+
+		directOutput TRUE
+		url "javascript:
+
+		function getAngle(x, z){
+			var rotation = new SFRotation(VECTOR_X, new SFVec3f(x, 0, z));
+			return rotation[1] * rotation[3];
+		}
+
+		function setVisible(until, xy, xz, yz){
+			waitUntil = until;
+			visibleXY.visible = xy;
+			visibleXZ.visible = xz;
+			visibleYZ.visible = yz;
+		}
+
+		function activeXY(){
+			arcXY.fromAngle = 0;
+			arcXY.toAngle = 0;
+			if (activeXY){
+				startFrom = hitpointXY;
+				setVisible(0, true, false, false);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 0){
+				setVisible(-1, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+
+		function activeXZ(){
+			arcXZ.fromAngle = 0;
+			arcXZ.toAngle = 0;
+			if (activeXZ){
+				startFrom = hitpointXZ;
+				setVisible(1, false, true, false);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 1){
+				setVisible(-1, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+
+		function activeYZ(){
+			arcYZ.fromAngle = 0;
+			arcYZ.toAngle = 0;
+			if (activeYZ){
+				startFrom = hitpointYZ;
+				setVisible(2, false, false, true);
+				dragStart = Browser.getTime();
+			} else if (waitUntil == 2){
+				setVisible(-1, true, true, true);
+				dragEnd = Browser.getTime();
+			}
+		}
+
+		function hitpointXY(){
+			if (activeXY){
+				arcXY.fromAngle = getAngle(startFrom[1], startFrom[0]);
+				arcXY.toAngle = getAngle(hitpointXY[1], hitpointXY[0]);
+				var delta = arcXY.toAngle - arcXY.fromAngle;
+				delta_changed = new SFRotation(0, 0, 1, delta);
+			}
+		}
+		function hitpointXZ(){
+			if (activeXZ){
+				arcXZ.fromAngle = getAngle(startFrom[2], startFrom[0]);
+				arcXZ.toAngle = getAngle(hitpointXZ[2], hitpointXZ[0]);
+				var delta = -1 * (arcXZ.toAngle - arcXZ.fromAngle);
+				delta_changed = new SFRotation(0, 1, 0, delta);
+			}
+		}
+		function hitpointYZ(){
+			if (activeYZ){
+				arcYZ.fromAngle = getAngle(startFrom[1], -startFrom[2]);
+				arcYZ.toAngle = getAngle(hitpointYZ[1], -hitpointYZ[2]);
+				delta_changed = new SFRotation(1, 0, 0, arcYZ.toAngle - arcYZ.fromAngle);
+			}
+		}
+
+		"
+	}
+
+	ROUTE sensorXY.isActive TO script.activeXY
+	ROUTE sensorXZ.isActive TO script.activeXZ
+	ROUTE sensorYZ.isActive TO script.activeYZ
+
+	ROUTE sensorXY.hitPoint_changed TO script.hitpointXY
+	ROUTE sensorXZ.hitPoint_changed TO script.hitpointXZ
+	ROUTE sensorYZ.hitPoint_changed TO script.hitpointYZ
+}
