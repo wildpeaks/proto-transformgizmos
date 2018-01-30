@@ -39,12 +39,12 @@ DEF gizmos TransformGizmos {
 	target USE target
 
 	# Local translate
-	isLocal TRUE
-	type 0
+#	isLocal TRUE
+#	type 0
 
 	# Local rotate
-#	isLocal TRUE
-#	type 1
+	isLocal TRUE
+	type 1
 
 	# Global translate
 #	isLocal FALSE

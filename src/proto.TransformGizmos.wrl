@@ -30,7 +30,7 @@ PROTO TransformGizmos [
 	exposedField  SFNode      target                NULL
 ]{
 	DEF gizmosTransform Transform {
-		children DEF choices Switch {
+		children DEF gizmosSwitch Switch {
 			choice [
 				DEF translateGizmo TranslateGizmo{}
 				DEF rotateGizmo RotateGizmo{}
@@ -43,7 +43,7 @@ PROTO TransformGizmos [
 		field         SFVec3f     EMPTY_SFVEC3F       0 0 0
 		field         SFRotation  EMPTY_SFROTATION    0 1 0 0
 
-		field         SFNode      choices               USE choices
+		field         SFNode      gizmosSwitch        USE gizmosSwitch
 		exposedField  SFInt32     type                IS type
 
 		exposedField  SFBool      isLocal             IS isLocal
@@ -109,7 +109,7 @@ PROTO TransformGizmos [
 		//-------------------------------------------------------------------//
 
 		function updateChoice(){
-			choices.whichChoice = (target != SFNODE_NULL) ? type : -1;
+			gizmosSwitch.whichChoice = (target != SFNODE_NULL) ? type : -1;
 		}
 		function type(){
 			updateChoice();
@@ -164,26 +164,13 @@ PROTO TransformGizmos [
 		}
 
 		function onRotationDelta(delta){
-//			if (isLocal){
-//				target.rotation = mergeRotations(delta, initialRotation);
-//			} else {
-//				var outerRotationMatrix = getRotationMatrix(outerRotation);
-//				target.setMatrix(
-//					mergeMatrices(
-//						getTranslationMatrix(initialTranslation),
-//						unmergeMatrices(
-//							mergeMatrices(
-//								getRotationMatrix(delta),
-//								mergeMatrices(
-//									outerRotationMatrix,
-//									getRotationMatrix(initialRotation)
-//								)
-//							),
-//							outerRotationMatrix
-//						)
-//					)
-//				);
-//			}
+			if (isLocal){
+				//
+				//
+				//
+			} else {
+				target.rotation = mergeRotations(delta, initialRotation);
+			}
 		}
 
 
@@ -197,14 +184,6 @@ PROTO TransformGizmos [
 	ROUTE constant.scale TO rotateGizmo.scale
 
 	ROUTE script.gizmoTranslation TO constant.translation
-
-	# Below touchsensors	
-#	ROUTE script.gizmoTranslation TO translateGizmo.translation
-#	ROUTE script.gizmoTranslation TO rotateGizmo.translation
-#	ROUTE script.gizmoRotation TO translateGizmo.rotation
-#	ROUTE script.gizmoRotation TO rotateGizmo.rotation
-
-	# Above touchsensors
 	ROUTE script.gizmoTranslation TO gizmosTransform.translation
 	ROUTE script.gizmoRotation TO gizmosTransform.rotation
 
