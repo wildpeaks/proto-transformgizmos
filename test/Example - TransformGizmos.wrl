@@ -4,8 +4,6 @@ EXTERNPROTO TransformGizmos [
 	exposedField  SFInt32     type
 	exposedField  SFBool      isLocal
 	exposedField  SFNode      target
-	exposedField  SFVec3f     containerTranslation
-	exposedField  SFRotation  containerRotation
 ] "../src/proto.TransformGizmos.wrl#TransformGizmos"
 
 
@@ -119,6 +117,27 @@ Layer3D {
 	}
 	children [
 		Transform {
+			translation 0 8 0
+			children [
+				DEF sensorReset TouchSensor {}
+				Shape {
+					appearance Appearance {
+						material Material {
+							emissiveColor 1 1 1
+						}
+					}
+					geometry Text {
+						string "Reset"
+						fontStyle FontStyle {
+							family "Arial"
+							style "BOLD USE_TEXTURE"
+						}
+					}
+				}
+			]
+		}
+
+		Transform {
 			translation 0 5 0
 			children [
 				DEF sensorLocal TouchSensor {}
@@ -201,7 +220,6 @@ Layer3D {
 				}
 			]
 		}
-
 		Transform {
 			translation 0 -5 0
 			children [
@@ -254,6 +272,7 @@ DEF script Script {
 	field    SFNode      rotationText        USE rotationText
 	field    SFNode      target              USE target
 
+	eventIn  SFTime      onReset
 	eventIn  SFTime      onClickLocal
 	eventIn  SFTime      onClickGlobal
 	eventIn  SFTime      onClickTranslation
@@ -264,6 +283,11 @@ DEF script Script {
 
 	directOutput TRUE
 	url "javascript:
+
+	function onReset(){
+		target.translation = new SFVec3f();
+		target.rotation = new SFRotation();
+	}
 
 	function onClickLocal(){
 		gizmos.isLocal = true;
@@ -295,6 +319,7 @@ DEF script Script {
 	"
 }
 
+ROUTE sensorReset.touchTime TO script.onReset
 ROUTE sensorLocal.touchTime TO script.onClickLocal
 ROUTE sensorGlobal.touchTime TO script.onClickGlobal
 ROUTE sensorTranslation.touchTime TO script.onClickTranslation
