@@ -34,7 +34,11 @@ PROTO RotateGizmo [
 	exposedField  SFVec3f     scale          1 1 1
 	eventOut      SFTime      dragStart
 	eventOut      SFTime      dragEnd
+
 	eventOut      SFRotation  delta_changed
+#	eventOut      SFFloat     deltaX_changed
+#	eventOut      SFFloat     deltaY_changed
+#	eventOut      SFFloat     deltaZ_changed
 ]{
 	Transform {
 		translation IS translation
@@ -338,30 +342,33 @@ PROTO RotateGizmo [
 
 	DEF mouse MouseSensor{}
 	DEF script Script {
-		field         SFVec3f     VECTOR_X       1 0 0
+		field         SFVec3f     VECTOR_X        1 0 0
 
-		field         SFVec3f     startFrom      0 0 0
-		field         SFInt32     waitUntil      -1
+		field         SFVec3f     startFrom       0 0 0
+		field         SFInt32     waitUntil       -1
 
-		field         SFNode      mouse          USE mouse
-		field         SFNode      visibleXY      USE visibleXY
-		field         SFNode      visibleXZ      USE visibleXZ
-		field         SFNode      visibleYZ      USE visibleYZ
-		field         SFNode      arcXY          USE arcXY
-		field         SFNode      arcXZ          USE arcXZ
-		field         SFNode      arcYZ          USE arcYZ
+		field         SFNode      mouse           USE mouse
+		field         SFNode      visibleXY       USE visibleXY
+		field         SFNode      visibleXZ       USE visibleXZ
+		field         SFNode      visibleYZ       USE visibleYZ
+		field         SFNode      arcXY           USE arcXY
+		field         SFNode      arcXZ           USE arcXZ
+		field         SFNode      arcYZ           USE arcYZ
 
-		exposedField  SFBool      activeXY       FALSE
-		exposedField  SFBool      activeXZ       FALSE
-		exposedField  SFBool      activeYZ       FALSE
+		exposedField  SFBool      activeXY        FALSE
+		exposedField  SFBool      activeXZ        FALSE
+		exposedField  SFBool      activeYZ        FALSE
 
-		exposedField  SFVec3f     hitpointXY     0 0 0
-		exposedField  SFVec3f     hitpointXZ     0 0 0
-		exposedField  SFVec3f     hitpointYZ     0 0 0
+		exposedField  SFVec3f     hitpointXY      0 0 0
+		exposedField  SFVec3f     hitpointXZ      0 0 0
+		exposedField  SFVec3f     hitpointYZ      0 0 0
 
-		eventOut      SFTime      dragStart      IS dragStart
-		eventOut      SFTime      dragEnd        IS dragEnd
-		eventOut      SFRotation  delta_changed  IS delta_changed
+		eventOut      SFTime      dragStart       IS dragStart
+		eventOut      SFTime      dragEnd         IS dragEnd
+		eventOut      SFRotation  delta_changed   IS delta_changed
+#		eventOut      SFFloat     deltaX_changed  IS deltaX_changed
+#		eventOut      SFFloat     deltaY_changed  IS deltaY_changed
+#		eventOut      SFFloat     deltaZ_changed  IS deltaZ_changed
 
 		directOutput TRUE
 		url "javascript:
@@ -423,6 +430,7 @@ PROTO RotateGizmo [
 				arcXY.toAngle = getAngle(hitpointXY[1], hitpointXY[0]);
 				var delta = arcXY.toAngle - arcXY.fromAngle;
 				delta_changed = new SFRotation(0, 0, 1, delta);
+//				deltaZ_changed = delta;
 			}
 		}
 		function hitpointXZ(){
@@ -431,13 +439,16 @@ PROTO RotateGizmo [
 				arcXZ.toAngle = getAngle(hitpointXZ[2], hitpointXZ[0]);
 				var delta = -1 * (arcXZ.toAngle - arcXZ.fromAngle);
 				delta_changed = new SFRotation(0, 1, 0, delta);
+//				deltaY_changed = delta;
 			}
 		}
 		function hitpointYZ(){
 			if (activeYZ){
 				arcYZ.fromAngle = getAngle(startFrom[1], -startFrom[2]);
 				arcYZ.toAngle = getAngle(hitpointYZ[1], -hitpointYZ[2]);
-				delta_changed = new SFRotation(1, 0, 0, arcYZ.toAngle - arcYZ.fromAngle);
+				var delta = arcYZ.toAngle - arcYZ.fromAngle;
+				delta_changed = new SFRotation(1, 0, 0, delta);
+//				deltaX_changed = delta;
 			}
 		}
 

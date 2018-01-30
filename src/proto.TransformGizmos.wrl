@@ -16,6 +16,9 @@ EXTERNPROTO RotateGizmo [
 	eventOut      SFTime      dragStart
 	eventOut      SFTime      dragEnd
 	eventOut      SFRotation  delta_changed
+#	eventOut      SFFloat     deltaX_changed
+#	eventOut      SFFloat     deltaY_changed
+#	eventOut      SFFloat     deltaZ_changed
 ] "proto.RotateGizmo.wrl#RotateGizmo"
 
 EXTERNPROTO ConstantSize [
@@ -83,11 +86,15 @@ PROTO TransformGizmos [
 		exposedField  SFRotation  gizmoRotation          0 1 0 0
 		field         SFVec3f     dragStartTranslation   0 0 0
 		field         SFRotation  dragStartRotation      0 1 0 0
+		field         SFMatrix    dragStartMatrix        1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1
 
 		eventIn       SFTime      onDragStart
 		eventIn       SFTime      onDragEnd
 		eventIn       SFVec3f     onTranslationDelta
 		eventIn       SFRotation  onRotationDelta
+#		eventIn       SFFloat     onRotationDeltaX
+#		eventIn       SFFloat     onRotationDeltaY
+#		eventIn       SFFloat     onRotationDeltaZ
 		eventIn       SFTime      updateGizmos           IS forceUpdate
 
 		field SFNode TODELETE USE TODELETE
@@ -159,8 +166,9 @@ PROTO TransformGizmos [
 		}
 
 		function onDragStart(){
-			dragStartTranslation = target.translation;
-			dragStartRotation = target.rotation;
+			dragStartTranslation = new SFVec3f(target.translation);
+			dragStartRotation = new SFRotation(target.rotation);
+			dragStartMatrix = new VrmlMatrix(target.getMatrix());
 		}
 
 		function onDragEnd(){
@@ -190,6 +198,34 @@ PROTO TransformGizmos [
 			target.translation = dragStartTranslation.add(globalDelta);
 		}
 
+
+//		function onRotationDeltaX(delta){ // BLUE
+//			//
+//			//
+//		}
+
+//		function onRotationDeltaY(delta){ // GREEN
+//			//
+//			//
+//		}
+
+//		function onRotationDeltaZ(delta){ // RED
+//			var localDelta = new SFRotation(0, 0, 1, delta);
+//			var globalDelta = mergeRotations(gizmoRotation, localDelta);
+//			target.rotation = globalDelta;
+//		}
+
+
+		function onRotationDelta(delta){ // RED
+			if (type == TYPE_LOCAL_ROTATE){
+				target.rotation = mergeRotations(gizmoRotation, delta); // ... but isn't gizmoRotation the same as dragStartRotation basically ? hmm, probably false hope then
+			} else {
+				target.rotation = mergeRotations(delta, dragStartRotation);
+			}
+		}
+
+
+		/**********************************************************************
 		function onRotationDelta(delta){
 			if (type == TYPE_LOCAL_ROTATE){
 //				trace('DELTA ' + delta);
@@ -286,6 +322,7 @@ PROTO TransformGizmos [
 				target.rotation = mergeRotations(delta, dragStartRotation);
 			}
 		}
+		**********************************************************************/
 
 
 		"
@@ -306,6 +343,9 @@ PROTO TransformGizmos [
 	ROUTE translateGizmo.dragEnd TO script.onDragEnd
 
 	ROUTE rotateGizmo.delta_changed TO script.onRotationDelta
+#	ROUTE rotateGizmo.deltaX_changed TO script.onRotationDeltaX
+#	ROUTE rotateGizmo.deltaY_changed TO script.onRotationDeltaY
+#	ROUTE rotateGizmo.deltaZ_changed TO script.onRotationDeltaZ
 	ROUTE rotateGizmo.dragStart TO script.onDragStart
 	ROUTE rotateGizmo.dragEnd TO script.onDragEnd
 }
