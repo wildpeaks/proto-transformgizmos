@@ -16,9 +16,6 @@ EXTERNPROTO RotateGizmo [
 	eventOut      SFTime      dragStart
 	eventOut      SFTime      dragEnd
 	eventOut      SFRotation  delta_changed
-#	eventOut      SFFloat     deltaX_changed
-#	eventOut      SFFloat     deltaY_changed
-#	eventOut      SFFloat     deltaZ_changed
 ] "proto.RotateGizmo.wrl#RotateGizmo"
 
 EXTERNPROTO ConstantSize [
@@ -53,21 +50,6 @@ PROTO TransformGizmos [
 		}
 	}
 
-	DEF	TODELETE Transform	{
-		children Shape {
-			appearance Appearance {
-				material Material {emissiveColor 1 1 0}
-			}
-			geometry Text {
-				string "DEBUG"
-				fontStyle FontStyle {
-					size 10
-					justify	"MIDDLE"
-				}
-			}
-		}
-	}
-
 	DEF script Script {
 		field         SFNode      EMPTY_SFNODE           NULL
 		field         SFVec3f     EMPTY_SFVEC3F          0 0 0
@@ -86,18 +68,12 @@ PROTO TransformGizmos [
 		exposedField  SFRotation  gizmoRotation          0 1 0 0
 		field         SFVec3f     dragStartTranslation   0 0 0
 		field         SFRotation  dragStartRotation      0 1 0 0
-		field         SFMatrix    dragStartMatrix        1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1
 
 		eventIn       SFTime      onDragStart
 		eventIn       SFTime      onDragEnd
 		eventIn       SFVec3f     onTranslationDelta
 		eventIn       SFRotation  onRotationDelta
-#		eventIn       SFFloat     onRotationDeltaX
-#		eventIn       SFFloat     onRotationDeltaY
-#		eventIn       SFFloat     onRotationDeltaZ
 		eventIn       SFTime      updateGizmos           IS forceUpdate
-
-		field SFNode TODELETE USE TODELETE
 
 		directOutput TRUE
 		url "javascript:
@@ -121,10 +97,6 @@ PROTO TransformGizmos [
 			return parentMatrix.multLeft(childMatrix);
 		}
 
-		function unmergeMatrices(mergedMatrix, parentMatrix){
-			return parentMatrix.inverse().multLeft(mergedMatrix);
-		}
-
 		function getTranslationMatrix(translation){
 			var transform = new SFNode('Transform{}');
 			transform.translation = translation;
@@ -141,12 +113,6 @@ PROTO TransformGizmos [
 			var transform = new SFNode('Transform{}');
 			transform.setMatrix(matrix);
 			return new SFVec3f(transform.translation);
-		}
-
-		function getRotation(matrix){
-			var transform = new SFNode('Transform{}');
-			transform.setMatrix(matrix);
-			return new SFRotation(transform.rotation);
 		}
 
 
@@ -166,9 +132,8 @@ PROTO TransformGizmos [
 		}
 
 		function onDragStart(){
-			dragStartTranslation = new SFVec3f(target.translation);
-			dragStartRotation = new SFRotation(target.rotation);
-			dragStartMatrix = new VrmlMatrix(target.getMatrix());
+			dragStartTranslation = target.translation;
+			dragStartRotation = target.rotation;
 		}
 
 		function onDragEnd(){
@@ -198,132 +163,13 @@ PROTO TransformGizmos [
 			target.translation = dragStartTranslation.add(globalDelta);
 		}
 
-
-//		function onRotationDeltaX(delta){ // BLUE
-//			//
-//			//
-//		}
-
-//		function onRotationDeltaY(delta){ // GREEN
-//			//
-//			//
-//		}
-
-//		function onRotationDeltaZ(delta){ // RED
-//			var localDelta = new SFRotation(0, 0, 1, delta);
-//			var globalDelta = mergeRotations(gizmoRotation, localDelta);
-//			target.rotation = globalDelta;
-//		}
-
-
-		function onRotationDelta(delta){ // RED
-			if (type == TYPE_LOCAL_ROTATE){
-				target.rotation = mergeRotations(gizmoRotation, delta); // ... but isn't gizmoRotation the same as dragStartRotation basically ? hmm, probably false hope then
-			} else {
-				target.rotation = mergeRotations(delta, dragStartRotation);
-			}
-		}
-
-
-		/**********************************************************************
 		function onRotationDelta(delta){
 			if (type == TYPE_LOCAL_ROTATE){
-//				trace('DELTA ' + delta);
-				// blue = X
-				// green = Y
-				// red = Z
-
-
-				// NOPE
-//				var globalDeltaMatrix = mergeMatrices(
-//					getRotationMatrix(gizmoRotation),
-//					getRotationMatrix(delta)
-//				);
-//				var newMatrix = mergeMatrices(
-//					globalDeltaMatrix,
-//					getRotationMatrix(initialRotation)
-//				);
-//				target.rotation
-
-
-				// Close, but nope
-//				var gizmoRotationMatrix = getRotationMatrix(gizmoRotation);
-//				target.setMatrix(
-//					mergeMatrices(
-//						getTranslationMatrix(dragStartTranslation),
-//						unmergeMatrices(
-//							mergeMatrices(
-//								getRotationMatrix(delta),
-//								mergeMatrices(
-//									gizmoRotationMatrix,
-//									getRotationMatrix(dragStartRotation)
-//								)
-//							),
-//							gizmoRotationMatrix
-//						)
-//					)
-//				);
-
-
-				// When rotation was global
-//				var globalDeltaMatrix = getRotationMatrix(delta);
-//				var outerRotationMatrix = getRotationMatrix(outerRotation);
-//
-//				var initialTranslationMatrix = getTranslationMatrix(initialTranslation);
-//				var initialRotationMatrix = getRotationMatrix(initialRotation);
-//
-//				var globalInitialRotationMatrix = mergeMatrices(outerRotationMatrix, initialRotationMatrix);
-//				var globalInitialRotationMatrixPlusDelta = mergeMatrices(globalDeltaMatrix, globalInitialRotationMatrix);
-//				var localInitialRotationMatrixPlusDelta = unmergeMatrices(globalInitialRotationMatrixPlusDelta, outerRotationMatrix);
-//				var localInitialMatrixPlusDelta = mergeMatrices(initialTranslationMatrix, localInitialRotationMatrixPlusDelta);
-//				innerTarget.setMatrix(localInitialMatrixPlusDelta);
-
-
-				// NOPE, not even close
-//				var globalDeltaMatrix = mergeMatrices(
-//					getRotationMatrix(gizmoRotation),
-//					getRotationMatrix(delta)
-//				);
-//				var outerRotationMatrix = getRotationMatrix(gizmoRotation);
-//
-//				var initialTranslationMatrix = getTranslationMatrix(dragStartTranslation);
-//				var initialRotationMatrix = getRotationMatrix(dragStartRotation);
-//
-//				var globalInitialRotationMatrix = mergeMatrices(outerRotationMatrix, initialRotationMatrix);
-//				var globalInitialRotationMatrixPlusDelta = mergeMatrices(globalDeltaMatrix, globalInitialRotationMatrix);
-//				var localInitialRotationMatrixPlusDelta = unmergeMatrices(globalInitialRotationMatrixPlusDelta, outerRotationMatrix);
-//				var localInitialMatrixPlusDelta = mergeMatrices(initialTranslationMatrix, localInitialRotationMatrixPlusDelta);
-//				target.setMatrix(localInitialMatrixPlusDelta);
-
-
-				// NOPE, nice try though <-- but why ???? it seems like the logical way to do it ????
-//				var globalDelta = mergeRotations(gizmoRotation, delta);
-//				target.rotation = TODELETE.rotation = mergeRotations(globalDelta, dragStartRotation);
-
-
-				// NOPE, like completely
-//				var globalDelta = mergeRotations(gizmoRotation.inverse(), delta);
-//				target.rotation = mergeRotations(globalDelta, dragStartRotation);
-
-
-				// Great, I keep going in circles and going back down to delta
-//				TODELETE.rotation = delta;
-//				var globalDelta = mergeRotations(gizmoRotation, delta);
-//				var globalDeltaMatrix = getRotationMatrix(globalDelta);
-////				TODELETE.rotation = globalDelta; // it does seem correct, i think ? but it has the extra gizmoRotation baked in, hmm, but wouldn't unmerge go back to delta ??
-//				var globalInitialRotationMatrix = getRotationMatrix(dragStartRotation);
-//				var backToDelta = unmergeMatrices(globalDeltaMatrix, globalInitialRotationMatrix);
-
-
-				// How about rotation gizmo sending 3 events, one per direction, then I can know the direction ?
-
-
+				target.rotation = mergeRotations(gizmoRotation, delta);
 			} else {
 				target.rotation = mergeRotations(delta, dragStartRotation);
 			}
 		}
-		**********************************************************************/
-
 
 		"
 	}
@@ -343,9 +189,6 @@ PROTO TransformGizmos [
 	ROUTE translateGizmo.dragEnd TO script.onDragEnd
 
 	ROUTE rotateGizmo.delta_changed TO script.onRotationDelta
-#	ROUTE rotateGizmo.deltaX_changed TO script.onRotationDeltaX
-#	ROUTE rotateGizmo.deltaY_changed TO script.onRotationDeltaY
-#	ROUTE rotateGizmo.deltaZ_changed TO script.onRotationDeltaZ
 	ROUTE rotateGizmo.dragStart TO script.onDragStart
 	ROUTE rotateGizmo.dragEnd TO script.onDragEnd
 }
