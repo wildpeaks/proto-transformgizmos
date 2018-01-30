@@ -119,6 +119,12 @@ PROTO TransformGizmos [
 			return new SFVec3f(transform.translation);
 		}
 
+		function getRotation(matrix){
+			var transform = new SFNode('Transform{}');
+			transform.setMatrix(matrix);
+			return new SFRotation(transform.rotation);
+		}
+
 
 		//-------------------------------------------------------------------//
 		// Gizmo
@@ -159,19 +165,87 @@ PROTO TransformGizmos [
 		//-------------------------------------------------------------------//
 
 		function onTranslationDelta(delta){
-			var deltaMatrix = mergeMatrices(
+			var globalDeltaMatrix = mergeMatrices(
 				getRotationMatrix(gizmoRotation),
 				getTranslationMatrix(delta)
 			);
-			var globalDelta = getTranslation(deltaMatrix);
+			var globalDelta = getTranslation(globalDeltaMatrix);
 			target.translation = dragStartTranslation.add(globalDelta);
 		}
 
 		function onRotationDelta(delta){
 			if (type == TYPE_LOCAL_ROTATE){
-				//
-				//
-				//
+//				trace('DELTA ' + delta);
+				// blue = X
+				// green = Y
+				// red = Z
+
+
+				// NOPE
+//				var globalDeltaMatrix = mergeMatrices(
+//					getRotationMatrix(gizmoRotation),
+//					getRotationMatrix(delta)
+//				);
+//				var newMatrix = mergeMatrices(
+//					globalDeltaMatrix,
+//					getRotationMatrix(initialRotation)
+//				);
+//				target.rotation
+
+
+				// Close, but nope
+//				var gizmoRotationMatrix = getRotationMatrix(gizmoRotation);
+//				target.setMatrix(
+//					mergeMatrices(
+//						getTranslationMatrix(dragStartTranslation),
+//						unmergeMatrices(
+//							mergeMatrices(
+//								getRotationMatrix(delta),
+//								mergeMatrices(
+//									gizmoRotationMatrix,
+//									getRotationMatrix(dragStartRotation)
+//								)
+//							),
+//							gizmoRotationMatrix
+//						)
+//					)
+//				);
+
+
+				// When rotation was global
+//				var globalDeltaMatrix = getRotationMatrix(delta);
+//				var outerRotationMatrix = getRotationMatrix(outerRotation);
+//
+//				var initialTranslationMatrix = getTranslationMatrix(initialTranslation);
+//				var initialRotationMatrix = getRotationMatrix(initialRotation);
+//
+//				var globalInitialRotationMatrix = mergeMatrices(outerRotationMatrix, initialRotationMatrix);
+//				var globalInitialRotationMatrixPlusDelta = mergeMatrices(globalDeltaMatrix, globalInitialRotationMatrix);
+//				var localInitialRotationMatrixPlusDelta = unmergeMatrices(globalInitialRotationMatrixPlusDelta, outerRotationMatrix);
+//				var localInitialMatrixPlusDelta = mergeMatrices(initialTranslationMatrix, localInitialRotationMatrixPlusDelta);
+//				innerTarget.setMatrix(localInitialMatrixPlusDelta);
+
+
+				// NOPE, not even close
+//				var globalDeltaMatrix = mergeMatrices(
+//					getRotationMatrix(gizmoRotation),
+//					getRotationMatrix(delta)
+//				);
+//				var outerRotationMatrix = getRotationMatrix(gizmoRotation);
+//
+//				var initialTranslationMatrix = getTranslationMatrix(dragStartTranslation);
+//				var initialRotationMatrix = getRotationMatrix(dragStartRotation);
+//
+//				var globalInitialRotationMatrix = mergeMatrices(outerRotationMatrix, initialRotationMatrix);
+//				var globalInitialRotationMatrixPlusDelta = mergeMatrices(globalDeltaMatrix, globalInitialRotationMatrix);
+//				var localInitialRotationMatrixPlusDelta = unmergeMatrices(globalInitialRotationMatrixPlusDelta, outerRotationMatrix);
+//				var localInitialMatrixPlusDelta = mergeMatrices(initialTranslationMatrix, localInitialRotationMatrixPlusDelta);
+//				target.setMatrix(localInitialMatrixPlusDelta);
+
+				// NOPE, nice try though
+//				var globalDelta = mergeRotations(gizmoRotation, delta);
+//				target.rotation = mergeRotations(globalDelta, dragStartRotation);
+
 			} else {
 				target.rotation = mergeRotations(delta, dragStartRotation);
 			}
