@@ -26,13 +26,11 @@ Selection {
 	select FALSE
 	collide FALSE
 	children [
-		DEF container Transform {
+		DEF target Transform {
 			translation 8 2 0
 			rotation 0.8 0.3 0.2 1
-			children DEF target Transform {
-				children Inline {
-					url "inlines/inline.dummy.wrl"
-				}
+			children Inline {
+				url "inlines/inline.dummy.wrl"
 			}
 		}
 	]
@@ -40,8 +38,6 @@ Selection {
 
 
 DEF gizmos TransformGizmos {
-	containerTranslation 8 2 0
-	containerRotation 0.8 0.3 0.2 1
 	target USE target
 
 	# Local translate
@@ -60,8 +56,6 @@ DEF gizmos TransformGizmos {
 #	isLocal FALSE
 #	type 1
 }
-ROUTE container.translation TO gizmos.containerTranslation
-ROUTE container.rotation TO gizmos.containerRotation
 
 
 # Grid floor

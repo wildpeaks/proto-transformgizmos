@@ -28,8 +28,6 @@ PROTO TransformGizmos [
 	exposedField  SFInt32     type                  -1
 	exposedField  SFBool      isLocal               TRUE
 	exposedField  SFNode      target                NULL
-	exposedField  SFVec3f     containerTranslation  0 0 0
-	exposedField  SFRotation  containerRotation     0 1 0 0
 ]{
 	DEF types Switch {
 		choice [
@@ -53,10 +51,7 @@ PROTO TransformGizmos [
 		exposedField  SFInt32     type                IS type
 
 		exposedField  SFBool      isLocal             IS isLocal
-		exposedField  SFNode      innerTarget         IS target
-		exposedField  SFVec3f     outerTranslation    IS containerTranslation
-		exposedField  SFRotation  outerRotation       IS containerRotation
-		field         SFMatrix    outerMatrix         1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1
+		exposedField  SFNode      target              IS target
 
 		field         SFVec3f     initialTranslation  0 0 0
 		field         SFRotation  initialRotation     0 1 0 0
@@ -69,6 +64,7 @@ PROTO TransformGizmos [
 		eventIn       SFVec3f     onTranslationDelta
 		eventIn       SFRotation  onRotationDelta
 		eventIn       SFTime      onDragStart
+		eventIn       SFTime      onDragEnd
 
 		directOutput TRUE
 		url "javascript:
@@ -120,64 +116,43 @@ PROTO TransformGizmos [
 		//-------------------------------------------------------------------//
 
 		function refreshWhichChoice(){
-			types.whichChoice = (innerTarget != SFNODE_NULL) ? type : -1;
+			types.whichChoice = (target != SFNODE_NULL) ? type : -1;
 		}
 		function type(){
 			refreshWhichChoice();
 		}
-		function innerTarget(){
+		function target(){
 			refreshWhichChoice();
 			updateGizmoTranslation();
 		}
-
 
 		//-------------------------------------------------------------------//
 		// Gizmo
 		//-------------------------------------------------------------------//
 
 		function updateGizmoTranslation(){
-			if (innerTarget != SFNODE_NULL){
-				var localCenter = getTranslationMatrix(innerTarget.translation);
-				var globalCenter = getTranslation(outerMatrix.multLeft(localCenter));
-				constant.translation = globalCenter;
-				translateGizmo.translation = rotateGizmo.translation = globalCenter;
+			if (target != SFNODE_NULL){
+				constant.translation = translateGizmo.translation = rotateGizmo.translation = target.translation;
 			}
 		}
 
 		function updateGizmoRotation(){
-			if (isLocal){
-				translateGizmo.rotation = rotateGizmo.rotation = outerRotation;
-			} else {
-				translateGizmo.rotation = rotateGizmo.rotation = new SFRotation();
+			if (target != SFNODE_NULL){
+				if (isLocal){
+					translateGizmo.rotation = rotateGizmo.rotation = target.rotation;
+				} else {
+					translateGizmo.rotation = rotateGizmo.rotation = new SFRotation();
+				}
 			}
 		}
 
-
-		//-------------------------------------------------------------------//
-		// Outer transform
-		//-------------------------------------------------------------------//
-
-		function onOuterChange(){
-			var outerTransform = new SFNode('Transform{}');
-			outerTransform.translation = outerTranslation;
-			outerTransform.rotation = outerRotation;
-			outerMatrix = outerTransform.getMatrix();
-			updateGizmoTranslation();
-			updateGizmoRotation();
-		}
-
-		function outerTranslation(){
-			updateOuterMatrix();
-		}
-		function outerRotation(){
-			updateOuterMatrix();
-		}
 		function isLocal(){
 			updateGizmoRotation();
 		}
 
 		function initialize(){
-			onOuterChange();
+			updateGizmoTranslation();
+			updateGizmoRotation();
 			refreshWhichChoice();
 		}
 
@@ -186,61 +161,63 @@ PROTO TransformGizmos [
 		// Apply the delta
 		//-------------------------------------------------------------------//
 
+		function onDragStart(){
+			initialTranslation = target.translation;
+			initialRotation = target.rotation;
+			initialMatrix = target.getMatrix();
+		}
+
+		function onDragEnd(){
+			updateGizmoRotation();
+		}
+
 		function onTranslationDelta(delta){
+			var globalDelta;
 			if (isLocal){
-				innerTarget.translation = initialTranslation.add(delta);
-			} else {
-				innerTarget.setMatrix(
-					unmergeMatrices(
-						mergeMatrices(
-							getTranslationMatrix(delta),
-							mergeMatrices(
-								outerMatrix,
-								initialMatrix
-							)
-						),
-						outerMatrix
-					)
+				var deltaMatrix = mergeMatrices(
+					getRotationMatrix(target.rotation),
+					getTranslationMatrix(delta)
 				);
+				globalDelta = getTranslation(deltaMatrix);
+			} else {
+				globalDelta = delta;
 			}
+			target.translation = initialTranslation.add(globalDelta);
 			updateGizmoTranslation();
 		}
 
 		function onRotationDelta(delta){
-			if (isLocal){
-				innerTarget.rotation = mergeRotations(delta, initialRotation);
-			} else {
-				var outerRotationMatrix = getRotationMatrix(outerRotation);
-				innerTarget.setMatrix(
-					mergeMatrices(
-						getTranslationMatrix(initialTranslation),
-						unmergeMatrices(
-							mergeMatrices(
-								getRotationMatrix(delta),
-								mergeMatrices(
-									outerRotationMatrix,
-									getRotationMatrix(initialRotation)
-								)
-							),
-							outerRotationMatrix
-						)
-					)
-				);
-			}
+//			if (isLocal){
+//				target.rotation = mergeRotations(delta, initialRotation);
+//			} else {
+//				var outerRotationMatrix = getRotationMatrix(outerRotation);
+//				target.setMatrix(
+//					mergeMatrices(
+//						getTranslationMatrix(initialTranslation),
+//						unmergeMatrices(
+//							mergeMatrices(
+//								getRotationMatrix(delta),
+//								mergeMatrices(
+//									outerRotationMatrix,
+//									getRotationMatrix(initialRotation)
+//								)
+//							),
+//							outerRotationMatrix
+//						)
+//					)
+//				);
+//			}
 		}
 
-		function onDragStart(){
-			initialTranslation = innerTarget.translation;
-			initialRotation = innerTarget.rotation;
-			initialMatrix = innerTarget.getMatrix();
-		}
 
 		"
 	}
 
 	ROUTE translateGizmo.delta_changed TO script.onTranslationDelta
 	ROUTE translateGizmo.dragStart TO script.onDragStart
+	ROUTE translateGizmo.dragEnd TO script.onDragEnd
 
 	ROUTE rotateGizmo.delta_changed TO script.onRotationDelta
 	ROUTE rotateGizmo.dragStart TO script.onDragStart
+	ROUTE rotateGizmo.dragEnd TO script.onDragEnd
 }
