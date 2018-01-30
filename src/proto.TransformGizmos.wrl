@@ -29,11 +29,13 @@ PROTO TransformGizmos [
 	exposedField  SFBool      isLocal               TRUE
 	exposedField  SFNode      target                NULL
 ]{
-	DEF choices Switch {
-		choice [
-			DEF translateGizmo TranslateGizmo{}
-			DEF rotateGizmo RotateGizmo{}
-		]
+	DEF gizmosTransform Transform {
+		children DEF choices Switch {
+			choice [
+				DEF translateGizmo TranslateGizmo{}
+				DEF rotateGizmo RotateGizmo{}
+			]
+		}
 	}
 
 	DEF script Script {
@@ -153,7 +155,6 @@ PROTO TransformGizmos [
 		//-------------------------------------------------------------------//
 
 		function onTranslationDelta(delta){
-			trace('[POS DELTA] ' + delta);
 			var deltaMatrix = mergeMatrices(
 				getRotationMatrix(gizmoRotation),
 				getTranslationMatrix(delta)
@@ -196,11 +197,16 @@ PROTO TransformGizmos [
 	ROUTE constant.scale TO rotateGizmo.scale
 
 	ROUTE script.gizmoTranslation TO constant.translation
-	ROUTE script.gizmoTranslation TO translateGizmo.translation
-	ROUTE script.gizmoTranslation TO rotateGizmo.translation
 
-	ROUTE script.gizmoRotation TO translateGizmo.rotation
-	ROUTE script.gizmoRotation TO rotateGizmo.rotation
+	# Below touchsensors	
+#	ROUTE script.gizmoTranslation TO translateGizmo.translation
+#	ROUTE script.gizmoTranslation TO rotateGizmo.translation
+#	ROUTE script.gizmoRotation TO translateGizmo.rotation
+#	ROUTE script.gizmoRotation TO rotateGizmo.rotation
+
+	# Above touchsensors
+	ROUTE script.gizmoTranslation TO gizmosTransform.translation
+	ROUTE script.gizmoRotation TO gizmosTransform.rotation
 
 	ROUTE translateGizmo.delta_changed TO script.onTranslationDelta
 	ROUTE translateGizmo.dragStart TO script.onDragStart
