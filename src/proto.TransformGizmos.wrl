@@ -50,6 +50,21 @@ PROTO TransformGizmos [
 		}
 	}
 
+	DEF	TODELETE Transform	{
+		children Shape {
+			appearance Appearance {
+				material Material {emissiveColor 1 1 0}
+			}
+			geometry Text {
+				string "DEBUG"
+				fontStyle FontStyle {
+					size 10
+					justify	"MIDDLE"
+				}
+			}
+		}
+	}
+
 	DEF script Script {
 		field         SFNode      EMPTY_SFNODE           NULL
 		field         SFVec3f     EMPTY_SFVEC3F          0 0 0
@@ -74,6 +89,8 @@ PROTO TransformGizmos [
 		eventIn       SFVec3f     onTranslationDelta
 		eventIn       SFRotation  onRotationDelta
 		eventIn       SFTime      updateGizmos           IS forceUpdate
+
+		field SFNode TODELETE USE TODELETE
 
 		directOutput TRUE
 		url "javascript:
@@ -242,9 +259,28 @@ PROTO TransformGizmos [
 //				var localInitialMatrixPlusDelta = mergeMatrices(initialTranslationMatrix, localInitialRotationMatrixPlusDelta);
 //				target.setMatrix(localInitialMatrixPlusDelta);
 
-				// NOPE, nice try though
+
+				// NOPE, nice try though <-- but why ???? it seems like the logical way to do it ????
 //				var globalDelta = mergeRotations(gizmoRotation, delta);
+//				target.rotation = TODELETE.rotation = mergeRotations(globalDelta, dragStartRotation);
+
+
+				// NOPE, like completely
+//				var globalDelta = mergeRotations(gizmoRotation.inverse(), delta);
 //				target.rotation = mergeRotations(globalDelta, dragStartRotation);
+
+
+				// Great, I keep going in circles and going back down to delta
+//				TODELETE.rotation = delta;
+//				var globalDelta = mergeRotations(gizmoRotation, delta);
+//				var globalDeltaMatrix = getRotationMatrix(globalDelta);
+////				TODELETE.rotation = globalDelta; // it does seem correct, i think ? but it has the extra gizmoRotation baked in, hmm, but wouldn't unmerge go back to delta ??
+//				var globalInitialRotationMatrix = getRotationMatrix(dragStartRotation);
+//				var backToDelta = unmergeMatrices(globalDeltaMatrix, globalInitialRotationMatrix);
+
+
+				// How about rotation gizmo sending 3 events, one per direction, then I can know the direction ?
+
 
 			} else {
 				target.rotation = mergeRotations(delta, dragStartRotation);
