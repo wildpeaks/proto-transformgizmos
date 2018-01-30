@@ -37,6 +37,9 @@ PROTO TransformGizmos [
 
 	# Transform-like object that gets edited by the gizmos
 	exposedField  SFNode      target                NULL
+
+	# Call this when the target ever changes for another reason than the gizmos
+	eventIn       SFTime      forceUpdate
 ]{
 	DEF gizmosTransform Transform {
 		children DEF gizmosSwitch Switch {
@@ -48,13 +51,13 @@ PROTO TransformGizmos [
 	}
 
 	DEF script Script {
-		field         SFNode      EMPTY_SFNODE          NULL
-		field         SFVec3f     EMPTY_SFVEC3F         0 0 0
-		field         SFRotation  EMPTY_SFROTATION      0 1 0 0
-		field         SFNode      gizmosSwitch          USE gizmosSwitch
+		field         SFNode      EMPTY_SFNODE           NULL
+		field         SFVec3f     EMPTY_SFVEC3F          0 0 0
+		field         SFRotation  EMPTY_SFROTATION       0 1 0 0
+		field         SFNode      gizmosSwitch           USE gizmosSwitch
 
-		exposedField  SFInt32     type                  IS type
-		field         SFInt32     TYPE_NONE             -1
+		exposedField  SFInt32     type                   IS type
+		field         SFInt32     TYPE_NONE              -1
 		field         SFInt32     TYPE_GLOBAL_TRANSLATE  0
 		field         SFInt32     TYPE_GLOBAL_ROTATE     1
 		field         SFInt32     TYPE_LOCAL_TRANSLATE   2
@@ -63,13 +66,14 @@ PROTO TransformGizmos [
 		exposedField  SFNode      target                 IS target
 		exposedField  SFVec3f     gizmoTranslation       0 0 0
 		exposedField  SFRotation  gizmoRotation          0 1 0 0
-		field         SFVec3f     initialTranslation     0 0 0
-		field         SFRotation  initialRotation        0 1 0 0
+		field         SFVec3f     dragStartTranslation   0 0 0
+		field         SFRotation  dragStartRotation      0 1 0 0
 
 		eventIn       SFTime      onDragStart
 		eventIn       SFTime      onDragEnd
 		eventIn       SFVec3f     onTranslationDelta
 		eventIn       SFRotation  onRotationDelta
+		eventIn       SFTime      updateGizmos           IS forceUpdate
 
 		directOutput TRUE
 		url "javascript:
@@ -120,7 +124,7 @@ PROTO TransformGizmos [
 		// Gizmo
 		//-------------------------------------------------------------------//
 
-		function updateGizmo(){
+		function updateGizmos(){
 			if (target != EMPTY_SFNODE){
 				var isLocal = (type == TYPE_LOCAL_TRANSLATE) || (type == TYPE_LOCAL_ROTATE);
 				gizmoTranslation = target.translation;
@@ -132,21 +136,21 @@ PROTO TransformGizmos [
 		}
 
 		function onDragStart(){
-			initialTranslation = target.translation;
-			initialRotation = target.rotation;
+			dragStartTranslation = target.translation;
+			dragStartRotation = target.rotation;
 		}
 
 		function onDragEnd(){
-			updateGizmo();
+			updateGizmos();
 		}
 		function type(){
-			updateGizmo();
+			updateGizmos();
 		}
 		function target(){
-			updateGizmo();
+			updateGizmos();
 		}
 		function initialize(){
-			updateGizmo();
+			updateGizmos();
 		}
 
 
@@ -160,7 +164,7 @@ PROTO TransformGizmos [
 				getTranslationMatrix(delta)
 			);
 			var globalDelta = getTranslation(deltaMatrix);
-			target.translation = initialTranslation.add(globalDelta);
+			target.translation = dragStartTranslation.add(globalDelta);
 		}
 
 		function onRotationDelta(delta){
@@ -169,7 +173,7 @@ PROTO TransformGizmos [
 				//
 				//
 			} else {
-				target.rotation = mergeRotations(delta, initialRotation);
+				target.rotation = mergeRotations(delta, dragStartRotation);
 			}
 		}
 

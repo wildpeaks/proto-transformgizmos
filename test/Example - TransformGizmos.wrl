@@ -1,8 +1,9 @@
 #VRML V2.0 utf8
 
 EXTERNPROTO TransformGizmos [
-	exposedField  SFInt32     type
-	exposedField  SFNode      target
+	exposedField  SFInt32  type
+	exposedField  SFNode   target
+	eventIn       SFTime   forceUpdate
 ] "../src/proto.TransformGizmos.wrl#TransformGizmos"
 
 
@@ -276,6 +277,7 @@ DEF script Script {
 	function onReset(){
 		target.translation = new SFVec3f();
 		target.rotation = new SFRotation();
+		gizmos.forceUpdate = 1;
 	}
 
 	function onClickGlobalTranslate(){
