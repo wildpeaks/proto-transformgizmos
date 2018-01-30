@@ -24,9 +24,18 @@ EXTERNPROTO ConstantSize [
 	eventOut      SFVec3f  scale
 ] "proto.ConstantSize.wrl#ConstantSize"
 
+
 PROTO TransformGizmos [
+
+	# Transform type:
+	# -1: none
+	#  0: global translate
+	#  1: global rotation
+	#  2: local translate
+	#  3: local rotation
 	exposedField  SFInt32     type                  -1
-	exposedField  SFBool      isLocal               TRUE
+
+	# Transform-like object that gets edited by the gizmos
 	exposedField  SFNode      target                NULL
 ]{
 	DEF gizmosTransform Transform {
@@ -39,21 +48,24 @@ PROTO TransformGizmos [
 	}
 
 	DEF script Script {
-		field         SFNode      SFNODE_NULL         NULL
-		field         SFVec3f     EMPTY_SFVEC3F       0 0 0
-		field         SFRotation  EMPTY_SFROTATION    0 1 0 0
+		field         SFNode      EMPTY_SFNODE          NULL
+		field         SFVec3f     EMPTY_SFVEC3F         0 0 0
+		field         SFRotation  EMPTY_SFROTATION      0 1 0 0
+		field         SFNode      gizmosSwitch          USE gizmosSwitch
 
-		field         SFNode      gizmosSwitch        USE gizmosSwitch
-		exposedField  SFInt32     type                IS type
+		exposedField  SFInt32     type                  IS type
+		field         SFInt32     TYPE_NONE             -1
+		field         SFInt32     TYPE_GLOBAL_TRANSLATE  0
+		field         SFInt32     TYPE_GLOBAL_ROTATE     1
+		field         SFInt32     TYPE_LOCAL_TRANSLATE   2
+		field         SFInt32     TYPE_LOCAL_ROTATE      3
 
-		exposedField  SFBool      isLocal             IS isLocal
-		exposedField  SFNode      target              IS target
+		exposedField  SFNode      target                 IS target
+		exposedField  SFVec3f     gizmoTranslation       0 0 0
+		exposedField  SFRotation  gizmoRotation          0 1 0 0
+		field         SFVec3f     initialTranslation     0 0 0
+		field         SFRotation  initialRotation        0 1 0 0
 
-		exposedField  SFVec3f     gizmoTranslation    0 0 0
-		exposedField  SFRotation  gizmoRotation       0 1 0 0
-
-		field         SFVec3f     initialTranslation  0 0 0
-		field         SFRotation  initialRotation     0 1 0 0
 		eventIn       SFTime      onDragStart
 		eventIn       SFTime      onDragEnd
 		eventIn       SFVec3f     onTranslationDelta
@@ -105,34 +117,18 @@ PROTO TransformGizmos [
 
 
 		//-------------------------------------------------------------------//
-		// Types
-		//-------------------------------------------------------------------//
-
-		function updateChoice(){
-			gizmosSwitch.whichChoice = (target != SFNODE_NULL) ? type : -1;
-		}
-		function type(){
-			updateChoice();
-		}
-		function target(){
-			updateChoice();
-			updateGizmo();
-		}
-
-
-		//-------------------------------------------------------------------//
 		// Gizmo
 		//-------------------------------------------------------------------//
 
 		function updateGizmo(){
-			if (target != SFNODE_NULL){
+			if (target != EMPTY_SFNODE){
+				var isLocal = (type == TYPE_LOCAL_TRANSLATE) || (type == TYPE_LOCAL_ROTATE);
 				gizmoTranslation = target.translation;
 				gizmoRotation = isLocal ? target.rotation : EMPTY_SFROTATION;
+				gizmosSwitch.whichChoice = ((type == TYPE_GLOBAL_TRANSLATE) || (type == TYPE_LOCAL_TRANSLATE)) ? 0 : 1;
+			} else {
+				gizmosSwitch.whichChoice = -1;
 			}
-		}
-
-		function isLocal(){
-			updateGizmo();
 		}
 
 		function onDragStart(){
@@ -143,10 +139,14 @@ PROTO TransformGizmos [
 		function onDragEnd(){
 			updateGizmo();
 		}
-
+		function type(){
+			updateGizmo();
+		}
+		function target(){
+			updateGizmo();
+		}
 		function initialize(){
 			updateGizmo();
-			updateChoice();
 		}
 
 
@@ -164,7 +164,7 @@ PROTO TransformGizmos [
 		}
 
 		function onRotationDelta(delta){
-			if (isLocal){
+			if (type == TYPE_LOCAL_ROTATE){
 				//
 				//
 				//
