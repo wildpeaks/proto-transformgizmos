@@ -16,5 +16,15 @@
   "bugs": {
     "url": "https://github.com/wildpeaks/proto-transformgizmos/issues"
   },
-  "homepage": "https://github.com/wildpeaks/proto-transformgizmos#readme"
+  "homepage": "https://github.com/wildpeaks/proto-transformgizmos#readme",
+  "dependencies": {
+    "@wildpeaks/proto-arc": "1.0.0",
+    "@wildpeaks/proto-arcline": "1.0.0",
+    "@wildpeaks/proto-constantsize": "1.0.0",
+    "@wildpeaks/proto-rotategizmo": "1.0.0",
+    "@wildpeaks/proto-thickcircleline": "1.0.0",
+    "@wildpeaks/proto-thickline": "1.0.0",
+    "@wildpeaks/proto-translategizmo": "1.0.0",
+    "@wildpeaks/proto-visible": "1.0.0"
+  }
 }
