@@ -54,7 +54,9 @@ PROTO TransformGizmos [
 		field         SFNode      EMPTY_SFNODE           NULL
 		field         SFVec3f     EMPTY_SFVEC3F          0 0 0
 		field         SFRotation  EMPTY_SFROTATION       0 1 0 0
+
 		field         SFNode      gizmosSwitch           USE gizmosSwitch
+		field         SFNode      translateGizmo         USE translateGizmo
 
 		exposedField  SFInt32     type                   IS type
 		field         SFInt32     TYPE_NONE              -1
@@ -137,6 +139,7 @@ PROTO TransformGizmos [
 		}
 
 		function onDragEnd(){
+			translateGizmo.translation = EMPTY_SFVEC3F;
 			updateGizmos();
 		}
 		function type(){
@@ -155,6 +158,8 @@ PROTO TransformGizmos [
 		//-------------------------------------------------------------------//
 
 		function onTranslationDelta(delta){
+			translateGizmo.translation = delta;
+
 			var globalDeltaMatrix = mergeMatrices(
 				getRotationMatrix(gizmoRotation),
 				getTranslationMatrix(delta)
