@@ -90,8 +90,8 @@ PROTO Debug [
 							emissiveColor IS color
 						}
 					}
-					geometry Cone {
-						bottomRadius 0.05
+					geometry Cylinder {
+						radius 0.005
 						height 2
 					}
 				}
@@ -102,8 +102,11 @@ PROTO Debug [
 
 
 Viewpoint {
-	position 0 0 10
+	position 0.100 -0.892 4.514
+	orientation 0.000 0.000 1.000 0.000
+	fieldOfView 0.785
 }
+
 Background {
 	skyColor .2 .2 .2
 }
@@ -116,15 +119,21 @@ Debug {
 	color 0 0 0
 }
 Debug {
-	# ACTUAL flipped
-	rotation 0 0 1 2.84847903251648
+	# NON-FLIPPED other example
+	rotation 0 0 1 -3.018757343292236
 	color 0 1 0
 }
-Debug {
-	# WRONG (toAngle - 2*PI) <----- WTF it does look correct ?? is the Arc proto wrong then ????
-	rotation 0 0 1 -3.434706
-	color 1 0 0
-}
+
+#Debug {
+#	# ACTUAL flipped
+#	rotation 0 0 1 2.84847903251648
+#	color 0 1 0
+#}
+#Debug {
+#	# WRONG (toAngle - 2*PI) <----- WTF it does look correct ?? is the Arc proto wrong then ????
+#	rotation 0 0 1 -3.434706
+#	color 1 0 0
+#}
 
 
 Shape {
@@ -138,39 +147,39 @@ Shape {
 	geometry Arc {
 
 		# Example of not Flipped (but another angle)
-#		fromAngle -2.03271222114563
-#		toAngle -3.018757343292236
+		fromAngle -2.03271222114563
+		toAngle -3.018757343292236
 
 		# Flipped
-		fromAngle -2.03271222114563
-		toAngle 2.84847903251648
+#		fromAngle -2.03271222114563
+#		toAngle 2.84847903251648
 	}
 }
 
 
-Shape {
-	appearance Appearance {
-		material Material {
-			diffuseColor 0 0 0
-			emissiveColor 0 0 1
-			transparency 0.5
-		}
-	}
-	geometry Arc {
-		fromAngle -2.03271222114563
+#Shape {
+#	appearance Appearance {
+#		material Material {
+#			diffuseColor 0 0 0
+#			emissiveColor 0 0 1
+#			transparency 0.5
+#		}
+#	}
+#	geometry Arc {
+#		fromAngle -2.03271222114563
 
-		# ACTUAL flipped
-		toAngle 2.84847903251648
+#		# ACTUAL flipped
+#		toAngle 2.84847903251648
 
-		# EXPECTED non-flipped version, but how to calculate it ?
-		# toAngle -3.85
+#		# EXPECTED non-flipped version, but how to calculate it ?
+#		# toAngle -3.85
 
 
-		# WRONG (toAngle - 2*PI)
-#		toAngle	-3.434706
+#		# WRONG (toAngle - 2*PI)
+##		toAngle	-3.434706
 
-		# WRONG (toAngle - PI)
-#		toAngle -0.29312
-	}
-}
+#		# WRONG (toAngle - PI)
+##		toAngle -0.29312
+#	}
+#}
 
