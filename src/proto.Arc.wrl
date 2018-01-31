@@ -36,7 +36,6 @@ PROTO Arc [
 				var minValue = fromAngle;
 				var maxValue = toAngle;
 				var delta = maxValue - minValue;
-
 				if (delta != 0){
 					var angle = minValue;
 					var angleBetween = delta / tesselation;

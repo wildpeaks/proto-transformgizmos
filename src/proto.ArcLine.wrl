@@ -25,18 +25,25 @@ PROTO ArcLine [
 		function refresh(){
 			var positions = new MFVec3f();
 			var coordIndex = new MFInt32();
-			var minValue = fromAngle;
-			var maxValue = toAngle;
-			var delta = maxValue - minValue;
-			if (delta != 0){
-				var angle = minValue;
-				var angleBetween = delta / tesselation;
-				for (var i = 0; i < tesselation + 1; i++){
-					positions[i] = new SFVec3f(-radius * Math.sin(angle), radius * Math.cos(angle), 0);
-					angle += angleBetween;
-					coordIndex[i] = i;
+			if (tesselation > 1){
+				if (toAngle < fromAngle){
+					while (toAngle < fromAngle){
+						toAngle += 2 * Math.PI;
+					}
 				}
-				coordIndex[tesselation + 1] = -1;
+				var minValue = fromAngle;
+				var maxValue = toAngle;
+				var delta = maxValue - minValue;
+				if (delta != 0){
+					var angle = minValue;
+					var angleBetween = delta / tesselation;
+					for (var i = 0; i < tesselation + 1; i++){
+						positions[i] = new SFVec3f(-radius * Math.sin(angle), radius * Math.cos(angle), 0);
+						angle += angleBetween;
+						coordIndex[i] = i;
+					}
+					coordIndex[tesselation + 1] = -1;
+				}
 			}
 			coords.point = positions;
 			geometry.coordIndex = coordIndex;
