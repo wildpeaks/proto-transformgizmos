@@ -28,9 +28,15 @@ PROTO Arc [
 			var positions = new MFVec3f();
 			var coordIndex = new MFInt32();
 			if (tesselation > 1){
+				if (toAngle < fromAngle){
+					while (toAngle < fromAngle){
+						toAngle += 2 * Math.PI;
+					}
+				}
 				var minValue = fromAngle;
 				var maxValue = toAngle;
 				var delta = maxValue - minValue;
+
 				if (delta != 0){
 					var angle = minValue;
 					var angleBetween = delta / tesselation;
@@ -74,6 +80,16 @@ PROTO Arc [
 # Example usage
 ###############################################################################
 
+Viewpoint {
+	position 0.833 -1.485 5.902
+	orientation 0.894 0.447 0.020 0.268
+	fieldOfView 0.785
+}
+
+Background {
+	skyColor .2 .2 .2
+}
+
 PROTO Debug [
 	exposedField  SFColor     color     0 0 0
 	exposedField  SFRotation  rotation  0 0 1 0
@@ -100,18 +116,6 @@ PROTO Debug [
 		]
 	}
 }
-
-
-Viewpoint {
-	position 0.100 -0.892 4.514
-	orientation 0.000 0.000 1.000 0.000
-	fieldOfView 0.785
-}
-
-Background {
-	skyColor .2 .2 .2
-}
-
 
 Debug {
 	rotation 0 0 1 -2
@@ -141,11 +145,26 @@ Shape {
 		}
 	}
 	geometry Arc {
+		radius 1
 		tesselation	9
 
 		# ONE WAY
-#		fromAngle -2
-#		toAngle 2.5
+		fromAngle -2
+		toAngle 2.5
+	}
+}
+
+Shape {
+	appearance Appearance {
+		material Material {
+			diffuseColor 0 0 0
+			emissiveColor 0 1 0
+			transparency 0.5
+		}
+	}
+	geometry Arc {
+		radius 2
+		tesselation	9
 
 		# THE OTHER WAY
 		fromAngle 2.5
