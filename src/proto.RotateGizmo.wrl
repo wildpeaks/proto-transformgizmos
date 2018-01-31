@@ -419,24 +419,30 @@ PROTO RotateGizmo [
 
 		function hitpointXY(){
 			if (activeXY){
-				arcXY.fromAngle = getAngle(startFrom[1], startFrom[0]);
-				arcXY.toAngle = getAngle(hitpointXY[1], hitpointXY[0]);
+				var angle1 = getAngle(startFrom[1], startFrom[0]);
+				var angle2 = getAngle(hitpointXY[1], hitpointXY[0]);
+				arcXY.fromAngle = angle1;
+				arcXY.toAngle = angle2;
 				var delta = arcXY.toAngle - arcXY.fromAngle;
 				delta_changed = new SFRotation(0, 0, 1, delta);
 			}
 		}
 		function hitpointXZ(){
 			if (activeXZ){
-				arcXZ.fromAngle = getAngle(startFrom[2], startFrom[0]);
-				arcXZ.toAngle = getAngle(hitpointXZ[2], hitpointXZ[0]);
+				var angle1 = getAngle(startFrom[2], startFrom[0]);
+				var angle2 = getAngle(hitpointXZ[2], hitpointXZ[0]);
+				arcXZ.fromAngle = angle1;
+				arcXZ.toAngle = angle2;
 				var delta = -1 * (arcXZ.toAngle - arcXZ.fromAngle);
 				delta_changed = new SFRotation(0, 1, 0, delta);
 			}
 		}
 		function hitpointYZ(){
 			if (activeYZ){
-				arcYZ.fromAngle = getAngle(startFrom[1], -startFrom[2]);
-				arcYZ.toAngle = getAngle(hitpointYZ[1], -hitpointYZ[2]);
+				var angle1 = getAngle(startFrom[1], -startFrom[2]);
+				var angle2 = getAngle(hitpointYZ[1], -hitpointYZ[2]);
+				arcYZ.fromAngle = angle1;
+				arcYZ.toAngle = angle1;
 				var delta = arcYZ.toAngle - arcYZ.fromAngle;
 				delta_changed = new SFRotation(1, 0, 0, delta);
 			}
