@@ -338,30 +338,35 @@ PROTO RotateGizmo [
 
 	DEF mouse MouseSensor{}
 	DEF script Script {
-		field         SFVec3f     VECTOR_X        1 0 0
+		field         SFVec3f     VECTOR_X           1 0 0
+		field         SFFloat     HALF_PI            1.57079632679
 
-		field         SFVec3f     startFrom       0 0 0
-		field         SFInt32     waitUntil       -1
+		field         SFVec3f     startFrom          0 0 0
+		field         SFInt32     waitUntil          -1
 
-		field         SFNode      mouse           USE mouse
-		field         SFNode      visibleXY       USE visibleXY
-		field         SFNode      visibleXZ       USE visibleXZ
-		field         SFNode      visibleYZ       USE visibleYZ
-		field         SFNode      arcXY           USE arcXY
-		field         SFNode      arcXZ           USE arcXZ
-		field         SFNode      arcYZ           USE arcYZ
+		field         SFNode      mouse              USE mouse
+		field         SFNode      visibleXY          USE visibleXY
+		field         SFNode      visibleXZ          USE visibleXZ
+		field         SFNode      visibleYZ          USE visibleYZ
+		field         SFNode      arcXY              USE arcXY
+		field         SFNode      arcXZ              USE arcXZ
+		field         SFNode      arcYZ              USE arcYZ
 
-		exposedField  SFBool      activeXY        FALSE
-		exposedField  SFBool      activeXZ        FALSE
-		exposedField  SFBool      activeYZ        FALSE
+		exposedField  SFBool      activeXY           FALSE
+		exposedField  SFBool      activeXZ           FALSE
+		exposedField  SFBool      activeYZ           FALSE
 
-		exposedField  SFVec3f     hitpointXY      0 0 0
-		exposedField  SFVec3f     hitpointXZ      0 0 0
-		exposedField  SFVec3f     hitpointYZ      0 0 0
+		exposedField  SFVec3f     hitpointXY         0 0 0
+		exposedField  SFVec3f     hitpointXZ         0 0 0
+		exposedField  SFVec3f     hitpointYZ         0 0 0
 
-		eventOut      SFTime      dragStart       IS dragStart
-		eventOut      SFTime      dragEnd         IS dragEnd
-		eventOut      SFRotation  delta_changed   IS delta_changed
+		eventOut      SFTime      dragStart          IS dragStart
+		eventOut      SFTime      dragEnd            IS dragEnd
+		eventOut      SFRotation  delta_changed      IS delta_changed
+
+		field         SFInt32     areaX              -1
+		field         SFInt32     areaY              -1
+		field         SFInt32     areaZ              -1
 
 		directOutput TRUE
 		url "javascript:
@@ -377,6 +382,43 @@ PROTO RotateGizmo [
 			visibleXZ.visible = xz;
 			visibleYZ.visible = yz;
 		}
+
+
+		/**
+		 * Converts an angle to the -PI..+PI range.
+		 * @param {SFFloat} angle  Angle in radian
+		 * @returns {SFFloat}
+		 */
+		function simplifyAngle(angle){
+			var simplified = angle;
+			while (simplified < Math.PI){
+				simplified += 2 * Math.PI;
+			}
+			while (simplified > Math.PI){
+				simplified -= 2 * Math.PI;
+			}
+			return simplified;
+		}
+
+
+		/**
+		 * Divides the circle in 4 areas, with angle1 being the top-center origin:
+		 * top-right: 0
+		 * bottom-right: 1
+		 * bottom-left: 2
+		 * top-left: 3
+		 */
+		function getArea(angle1, angle2){
+			var angle = simplifyAngle(angle2 - angle1);
+			var area = -1;
+			if (angle < 0){
+				area = (angle > -HALF_PI) ? 3 : 2;
+			} else {
+				area = (angle > HALF_PI) ? 1 : 0;
+			}
+			return area;
+		}
+
 
 		function activeXY(){
 			arcXY.fromAngle = 0;
@@ -421,6 +463,14 @@ PROTO RotateGizmo [
 			if (activeXY){
 				var angle1 = getAngle(startFrom[1], startFrom[0]);
 				var angle2 = getAngle(hitpointXY[1], hitpointXY[0]);
+
+				var area = getArea(angle1, angle2);
+				trace('AREA ' + area);
+				//
+				// TODO
+				//
+				areaX = area;
+
 				arcXY.fromAngle = angle1;
 				arcXY.toAngle = angle2;
 				var delta = arcXY.toAngle - arcXY.fromAngle;
@@ -431,6 +481,14 @@ PROTO RotateGizmo [
 			if (activeXZ){
 				var angle1 = getAngle(startFrom[2], startFrom[0]);
 				var angle2 = getAngle(hitpointXZ[2], hitpointXZ[0]);
+
+				var area = getArea(angle1, angle2);
+				trace('AREA ' + area);
+				//
+				// TODO
+				//
+				areaX = area;
+
 				arcXZ.fromAngle = angle1;
 				arcXZ.toAngle = angle2;
 				var delta = -1 * (arcXZ.toAngle - arcXZ.fromAngle);
@@ -441,6 +499,14 @@ PROTO RotateGizmo [
 			if (activeYZ){
 				var angle1 = getAngle(startFrom[1], -startFrom[2]);
 				var angle2 = getAngle(hitpointYZ[1], -hitpointYZ[2]);
+
+				var area = getArea(angle1, angle2);
+				trace('AREA ' + area);
+				//
+				// TODO
+				//
+				areaX = area;
+
 				arcYZ.fromAngle = angle1;
 				arcYZ.toAngle = angle1;
 				var delta = arcYZ.toAngle - arcYZ.fromAngle;
