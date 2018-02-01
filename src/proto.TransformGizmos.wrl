@@ -4,6 +4,7 @@ EXTERNPROTO TranslateGizmo [
 	exposedField  SFVec3f     translation
 	exposedField  SFRotation  rotation
 	exposedField  SFVec3f     scale
+	exposedField  SFBool      onlyY
 	eventOut      SFTime      dragStart
 	eventOut      SFTime      dragEnd
 	eventOut      SFVec3f     delta_changed
@@ -24,51 +25,63 @@ EXTERNPROTO ConstantSize [
 	eventOut      SFVec3f  scale
 ] "proto.ConstantSize.wrl#ConstantSize"
 
+
 PROTO TransformGizmos [
-	exposedField  SFInt32     type                  -1
-	exposedField  SFBool      isLocal               TRUE
-	exposedField  SFNode      target                NULL
-	exposedField  SFVec3f     containerTranslation  0 0 0
-	exposedField  SFRotation  containerRotation     0 1 0 0
+
+	# Transform type:
+	# -1: none
+	#  0: global translate
+	#  1: global rotation
+	#  2: local translate
+	#  3: local rotation
+	exposedField  SFInt32     type            -1
+
+	# Transform-like object that gets edited by the gizmos
+	exposedField  SFNode      target         NULL
+
+	# When TRUE, only Y axis is shown
+	exposedField  SFBool      onlyY          FALSE
+
+	# Call this when the target ever changes for another reason than the gizmos
+	eventIn       SFTime      forceUpdate
 ]{
-	DEF types Switch {
-		choice [
-			DEF translateGizmo TranslateGizmo{}
-			DEF rotateGizmo RotateGizmo{}
-		]
+	DEF gizmosTransform Transform {
+		children DEF gizmosSwitch Switch {
+			choice [
+				DEF translateGizmo TranslateGizmo{
+					onlyY IS onlyY
+				}
+				DEF rotateGizmo RotateGizmo{}
+			]
+		}
 	}
-
-	DEF constant ConstantSize {
-		scaleFactor 0.2 0.2 0.2
-	}
-	ROUTE constant.scale TO translateGizmo.scale
-	ROUTE constant.scale TO rotateGizmo.scale
-
 
 	DEF script Script {
-		field         SFNode      SFNODE_NULL         NULL
-		field         SFVec3f     SFVEC3F_0_0_0       0 0 0
+		field         SFNode      EMPTY_SFNODE           NULL
+		field         SFVec3f     EMPTY_SFVEC3F          0 0 0
+		field         SFRotation  EMPTY_SFROTATION       0 1 0 0
 
-		field         SFNode      types               USE types
-		exposedField  SFInt32     type                IS type
+		field         SFNode      gizmosSwitch           USE gizmosSwitch
+		field         SFNode      translateGizmo         USE translateGizmo
 
-		exposedField  SFBool      isLocal             IS isLocal
-		exposedField  SFNode      innerTarget         IS target
-		exposedField  SFVec3f     outerTranslation    IS containerTranslation
-		exposedField  SFRotation  outerRotation       IS containerRotation
-		field         SFMatrix    outerMatrix         1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1
+		exposedField  SFInt32     type                   IS type
+		field         SFInt32     TYPE_NONE              -1
+		field         SFInt32     TYPE_GLOBAL_TRANSLATE  0
+		field         SFInt32     TYPE_GLOBAL_ROTATE     1
+		field         SFInt32     TYPE_LOCAL_TRANSLATE   2
+		field         SFInt32     TYPE_LOCAL_ROTATE      3
 
-		field         SFVec3f     initialTranslation  0 0 0
-		field         SFRotation  initialRotation     0 1 0 0
-		field         SFMatrix    initialMatrix       1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1
+		exposedField  SFNode      target                 IS target
+		exposedField  SFVec3f     gizmoTranslation       0 0 0
+		exposedField  SFRotation  gizmoRotation          0 1 0 0
+		field         SFVec3f     dragStartTranslation   0 0 0
+		field         SFRotation  dragStartRotation      0 1 0 0
 
-		field         SFNode      translateGizmo      USE translateGizmo
-		field         SFNode      rotateGizmo         USE rotateGizmo
-		field         SFNode      constant            USE constant
-
+		eventIn       SFTime      onDragStart
+		eventIn       SFTime      onDragEnd
 		eventIn       SFVec3f     onTranslationDelta
 		eventIn       SFRotation  onRotationDelta
-		eventIn       SFTime      onDragStart
+		eventIn       SFTime      updateGizmos           IS forceUpdate
 
 		directOutput TRUE
 		url "javascript:
@@ -82,18 +95,14 @@ PROTO TransformGizmos [
 			var parentMatrix = new VrmlMatrix();
 			var childMatrix = new VrmlMatrix();
 			var mergedRotation = new SFRotation();
-			parentMatrix.setTransform(SFVEC3F_0_0_0, parentRotation);
-			childMatrix.setTransform(SFVEC3F_0_0_0, childRotation);
+			parentMatrix.setTransform(EMPTY_SFVEC3F, parentRotation);
+			childMatrix.setTransform(EMPTY_SFVEC3F, childRotation);
 			parentMatrix.multLeft(childMatrix).getTransform(null, mergedRotation, null);
 			return mergedRotation;
 		}
 
 		function mergeMatrices(parentMatrix, childMatrix){
 			return parentMatrix.multLeft(childMatrix);
-		}
-
-		function unmergeMatrices(mergedMatrix, parentMatrix){
-			return parentMatrix.inverse().multLeft(mergedMatrix);
 		}
 
 		function getTranslationMatrix(translation){
@@ -116,69 +125,37 @@ PROTO TransformGizmos [
 
 
 		//-------------------------------------------------------------------//
-		// Types
-		//-------------------------------------------------------------------//
-
-		function refreshWhichChoice(){
-			types.whichChoice = (innerTarget != SFNODE_NULL) ? type : -1;
-		}
-		function type(){
-			refreshWhichChoice();
-		}
-		function innerTarget(){
-			refreshWhichChoice();
-			updateGizmoTranslation();
-		}
-
-
-		//-------------------------------------------------------------------//
 		// Gizmo
 		//-------------------------------------------------------------------//
 
-		function updateGizmoTranslation(){
-			if (innerTarget != SFNODE_NULL){
-				var localCenter = getTranslationMatrix(innerTarget.translation);
-				var globalCenter = getTranslation(outerMatrix.multLeft(localCenter));
-				constant.translation = globalCenter;
-				translateGizmo.translation = rotateGizmo.translation = globalCenter;
-			}
-		}
-
-		function updateGizmoRotation(){
-			if (isLocal){
-				translateGizmo.rotation = rotateGizmo.rotation = outerRotation;
+		function updateGizmos(){
+			if (target != EMPTY_SFNODE){
+				var isLocal = (type == TYPE_LOCAL_TRANSLATE) || (type == TYPE_LOCAL_ROTATE);
+				gizmoTranslation = target.translation;
+				gizmoRotation = isLocal ? target.rotation : EMPTY_SFROTATION;
+				gizmosSwitch.whichChoice = ((type == TYPE_GLOBAL_TRANSLATE) || (type == TYPE_LOCAL_TRANSLATE)) ? 0 : 1;
 			} else {
-				translateGizmo.rotation = rotateGizmo.rotation = new SFRotation();
+				gizmosSwitch.whichChoice = -1;
 			}
 		}
 
-
-		//-------------------------------------------------------------------//
-		// Outer transform
-		//-------------------------------------------------------------------//
-
-		function onOuterChange(){
-			var outerTransform = new SFNode('Transform{}');
-			outerTransform.translation = outerTranslation;
-			outerTransform.rotation = outerRotation;
-			outerMatrix = outerTransform.getMatrix();
-			updateGizmoTranslation();
-			updateGizmoRotation();
+		function onDragStart(){
+			dragStartTranslation = target.translation;
+			dragStartRotation = target.rotation;
 		}
 
-		function outerTranslation(){
-			updateOuterMatrix();
+		function onDragEnd(){
+			translateGizmo.translation = EMPTY_SFVEC3F;
+			updateGizmos();
 		}
-		function outerRotation(){
-			updateOuterMatrix();
+		function type(){
+			updateGizmos();
 		}
-		function isLocal(){
-			updateGizmoRotation();
+		function target(){
+			updateGizmos();
 		}
-
 		function initialize(){
-			onOuterChange();
-			refreshWhichChoice();
+			updateGizmos();
 		}
 
 
@@ -187,60 +164,42 @@ PROTO TransformGizmos [
 		//-------------------------------------------------------------------//
 
 		function onTranslationDelta(delta){
-			if (isLocal){
-				innerTarget.translation = initialTranslation.add(delta);
-			} else {
-				innerTarget.setMatrix(
-					unmergeMatrices(
-						mergeMatrices(
-							getTranslationMatrix(delta),
-							mergeMatrices(
-								outerMatrix,
-								initialMatrix
-							)
-						),
-						outerMatrix
-					)
-				);
-			}
-			updateGizmoTranslation();
+			translateGizmo.translation = delta;
+
+			var globalDeltaMatrix = mergeMatrices(
+				getRotationMatrix(gizmoRotation),
+				getTranslationMatrix(delta)
+			);
+			var globalDelta = getTranslation(globalDeltaMatrix);
+			target.translation = dragStartTranslation.add(globalDelta);
 		}
 
 		function onRotationDelta(delta){
-			if (isLocal){
-				innerTarget.rotation = mergeRotations(delta, initialRotation);
+			if (type == TYPE_LOCAL_ROTATE){
+				target.rotation = mergeRotations(gizmoRotation, delta);
 			} else {
-				var outerRotationMatrix = getRotationMatrix(outerRotation);
-				innerTarget.setMatrix(
-					mergeMatrices(
-						getTranslationMatrix(initialTranslation),
-						unmergeMatrices(
-							mergeMatrices(
-								getRotationMatrix(delta),
-								mergeMatrices(
-									outerRotationMatrix,
-									getRotationMatrix(initialRotation)
-								)
-							),
-							outerRotationMatrix
-						)
-					)
-				);
+				target.rotation = mergeRotations(delta, dragStartRotation);
 			}
-		}
-
-		function onDragStart(){
-			initialTranslation = innerTarget.translation;
-			initialRotation = innerTarget.rotation;
-			initialMatrix = innerTarget.getMatrix();
 		}
 
 		"
 	}
 
+	DEF constant ConstantSize {
+		scaleFactor 0.2 0.2 0.2
+	}
+	ROUTE constant.scale TO translateGizmo.scale
+	ROUTE constant.scale TO rotateGizmo.scale
+
+	ROUTE script.gizmoTranslation TO constant.translation
+	ROUTE script.gizmoTranslation TO gizmosTransform.translation
+	ROUTE script.gizmoRotation TO gizmosTransform.rotation
+
 	ROUTE translateGizmo.delta_changed TO script.onTranslationDelta
 	ROUTE translateGizmo.dragStart TO script.onDragStart
+	ROUTE translateGizmo.dragEnd TO script.onDragEnd
 
 	ROUTE rotateGizmo.delta_changed TO script.onRotationDelta
 	ROUTE rotateGizmo.dragStart TO script.onDragStart
+	ROUTE rotateGizmo.dragEnd TO script.onDragEnd
 }

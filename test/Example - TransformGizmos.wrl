@@ -1,11 +1,10 @@
 #VRML V2.0 utf8
 
 EXTERNPROTO TransformGizmos [
-	exposedField  SFInt32     type
-	exposedField  SFBool      isLocal
-	exposedField  SFNode      target
-	exposedField  SFVec3f     containerTranslation
-	exposedField  SFRotation  containerRotation
+	exposedField  SFInt32  type
+	exposedField  SFNode   target
+	exposedField  SFBool   onlyY
+	eventIn       SFTime   forceUpdate
 ] "../src/proto.TransformGizmos.wrl#TransformGizmos"
 
 
@@ -25,43 +24,31 @@ Viewpoint {
 Selection {
 	select FALSE
 	collide FALSE
-	children [
-		DEF container Transform {
-			translation 8 2 0
-			rotation 0.8 0.3 0.2 1
-			children DEF target Transform {
-				children Inline {
-					url "inlines/inline.dummy.wrl"
-				}
-			}
+	children DEF target Transform {
+		translation 8 2 0
+		rotation 0.8 0.3 0.2 1
+		children Inline {
+			url "inlines/inline.dummy.wrl"
 		}
-	]
+	}
 }
 
 
 DEF gizmos TransformGizmos {
-	containerTranslation 8 2 0
-	containerRotation 0.8 0.3 0.2 1
 	target USE target
 
-	# Local translate
-	isLocal TRUE
-	type 0
-
-	# Local rotate
-#	isLocal TRUE
-#	type 1
-
 	# Global translate
-#	isLocal FALSE
 #	type 0
 
 	# Global rotate
-#	isLocal FALSE
 #	type 1
+
+	# Local translate
+#	type 2
+
+	# Local rotate
+	type 3
 }
-ROUTE container.translation TO gizmos.containerTranslation
-ROUTE container.rotation TO gizmos.containerRotation
 
 
 # Grid floor
@@ -125,9 +112,9 @@ Layer3D {
 	}
 	children [
 		Transform {
-			translation 0 5 0
+			translation 0 8 0
 			children [
-				DEF sensorLocal TouchSensor {}
+				DEF sensorReset TouchSensor {}
 				Shape {
 					appearance Appearance {
 						material Material {
@@ -135,7 +122,28 @@ Layer3D {
 						}
 					}
 					geometry Text {
-						string "Switch to LOCAL"
+						string "Reset"
+						fontStyle FontStyle {
+							family "Arial"
+							style "BOLD USE_TEXTURE"
+						}
+					}
+				}
+			]
+		}
+
+		Transform {
+			translation 0 5 0
+			children [
+				DEF sensorGlobalTranslate TouchSensor {}
+				Shape {
+					appearance Appearance {
+						material Material {
+							emissiveColor 1 1 1
+						}
+					}
+					geometry Text {
+						string "Switch to GLOBAL TRANSLATE"
 						fontStyle FontStyle {
 							family "Arial"
 							style "BOLD USE_TEXTURE"
@@ -147,7 +155,7 @@ Layer3D {
 		Transform {
 			translation 0 3 0
 			children [
-				DEF sensorGlobal TouchSensor {}
+				DEF sensorGlobalRotate TouchSensor {}
 				Shape {
 					appearance Appearance {
 						material Material {
@@ -156,7 +164,7 @@ Layer3D {
 						}
 					}
 					geometry Text {
-						string "Switch to GLOBAL"
+						string "Switch to GLOBAL ROTATE"
 						fontStyle FontStyle {
 							family "Arial"
 							style "BOLD USE_TEXTURE"
@@ -168,7 +176,7 @@ Layer3D {
 		Transform {
 			translation 0 0 0
 			children [
-				DEF sensorTranslation TouchSensor {}
+				DEF sensorLocalTranslate TouchSensor {}
 				Shape {
 					appearance Appearance {
 						material Material {
@@ -177,7 +185,7 @@ Layer3D {
 						}
 					}
 					geometry Text {
-						string "Switch to TRANSLATE"
+						string "Switch to LOCAL TRANSLATE"
 						fontStyle FontStyle {
 							family "Arial"
 							style "BOLD USE_TEXTURE"
@@ -189,7 +197,7 @@ Layer3D {
 		Transform {
 			translation 0 -2 0
 			children [
-				DEF sensorRotation TouchSensor {}
+				DEF sensorLocalRotate TouchSensor {}
 				Shape {
 					appearance Appearance {
 						material Material {
@@ -198,7 +206,7 @@ Layer3D {
 						}
 					}
 					geometry Text {
-						string "Switch to ROTATE"
+						string "Switch to LOCAL ROTATE"
 						fontStyle FontStyle {
 							family "Arial"
 							style "BOLD USE_TEXTURE"
@@ -207,7 +215,6 @@ Layer3D {
 				}
 			]
 		}
-
 		Transform {
 			translation 0 -5 0
 			children [
@@ -251,19 +258,16 @@ Layer3D {
 
 
 DEF script Script {
-	field    SFInt32     TYPE_NONE          -1
-	field    SFInt32     TYPE_TRANSLATE     0
-	field    SFInt32     TYPE_ROTATE        1
-
 	field    SFNode      gizmos              USE gizmos
 	field    SFNode      translationText     USE translationText
 	field    SFNode      rotationText        USE rotationText
 	field    SFNode      target              USE target
 
-	eventIn  SFTime      onClickLocal
-	eventIn  SFTime      onClickGlobal
-	eventIn  SFTime      onClickTranslation
-	eventIn  SFTime      onClickRotation
+	eventIn  SFTime      onReset
+	eventIn  SFTime      onClickGlobalTranslate
+	eventIn  SFTime      onClickGlobalRotate
+	eventIn  SFTime      onClickLocalTranslate
+	eventIn  SFTime      onClickLocalRotate
 
 	eventIn  SFVec3f     onTranslation
 	eventIn  SFRotation  onRotation
@@ -271,25 +275,31 @@ DEF script Script {
 	directOutput TRUE
 	url "javascript:
 
-	function onClickLocal(){
-		gizmos.isLocal = true;
-	}
-	function onClickGlobal(){
-		gizmos.isLocal = false;
-	}
-	function onClickTranslation(){
-		gizmos.type = TYPE_TRANSLATE;
-	}
-	function onClickRotation(){
-		gizmos.type = TYPE_ROTATE;
+	function onReset(){
+		target.translation = new SFVec3f();
+		target.rotation = new SFRotation();
+		gizmos.forceUpdate = 1;
 	}
 
-	function initialize(){
-		updateTexts();
+	function onClickGlobalTranslate(){
+		gizmos.type = 0;
 	}
+	function onClickGlobalRotate(){
+		gizmos.type = 1;
+	}
+	function onClickLocalTranslate(){
+		gizmos.type = 2;
+	}
+	function onClickLocalRotate(){
+		gizmos.type = 3;
+	}
+
 	function updateTexts(){
 		translationText.string = new MFString('target.translation: ' + target.translation);
 		rotationText.string = new MFString('target.rotation: ' + target.rotation);
+	}
+	function initialize(){
+		updateTexts();
 	}
 	function onTranslation(){
 		updateTexts();
@@ -301,10 +311,11 @@ DEF script Script {
 	"
 }
 
-ROUTE sensorLocal.touchTime TO script.onClickLocal
-ROUTE sensorGlobal.touchTime TO script.onClickGlobal
-ROUTE sensorTranslation.touchTime TO script.onClickTranslation
-ROUTE sensorRotation.touchTime TO script.onClickRotation
+ROUTE sensorReset.touchTime TO script.onReset
+ROUTE sensorGlobalTranslate.touchTime TO script.onClickGlobalTranslate
+ROUTE sensorGlobalRotate.touchTime TO script.onClickGlobalRotate
+ROUTE sensorLocalTranslate.touchTime TO script.onClickLocalTranslate
+ROUTE sensorLocalRotate.touchTime TO script.onClickLocalRotate
 
 ROUTE target.translation TO script.onTranslation
 ROUTE target.rotation TO script.onRotation

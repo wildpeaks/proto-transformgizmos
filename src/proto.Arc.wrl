@@ -28,6 +28,11 @@ PROTO Arc [
 			var positions = new MFVec3f();
 			var coordIndex = new MFInt32();
 			if (tesselation > 1){
+				if (toAngle < fromAngle){
+					while (toAngle < fromAngle){
+						toAngle += 2 * Math.PI;
+					}
+				}
 				var minValue = fromAngle;
 				var maxValue = toAngle;
 				var delta = maxValue - minValue;
@@ -38,11 +43,11 @@ PROTO Arc [
 						positions[i] = new SFVec3f(-radius * Math.sin(angle), radius * Math.cos(angle), 0);
 						angle += angleBetween;
 					}
-					positions[tesselation] = new SFVec3f(0, 0, 0);
+					positions[tesselation + 1] = new SFVec3f(0, 0, 0);
 
 					var j = 0;
 					for (var i = 1; i < tesselation + 1; i++){
-						coordIndex[j] = tesselation;
+						coordIndex[j] = tesselation + 1;
 						coordIndex[j + 1] = i - 1;
 						coordIndex[j + 2] = i;
 						coordIndex[j + 3] = -1;

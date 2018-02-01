@@ -24,8 +24,8 @@ Transform {
             		appearance Appearance {
             			material Material {
 							transparency 0.85
-                			diffuseColor 0.11 0.11 0.694
-                			emissiveColor 0.120172 0.120172 0.759657
+							diffuseColor 0 0 0
+                			emissiveColor 0 1 0
             			}
             		}
         			geometry IndexedFaceSet {
@@ -82,8 +82,8 @@ Transform {
             		appearance Appearance {
             			material Material {
 							transparency 0.85
-                			diffuseColor 0.69 0.102 0.102
-                			emissiveColor 0.771930 0.114035 0.114035
+							diffuseColor 0 0 0
+                			emissiveColor 1 0 0
             			}
             		}
         			geometry IndexedFaceSet {
@@ -141,8 +141,8 @@ Transform {
             		appearance Appearance {
             			material Material {
 							transparency 0.85
-                			diffuseColor 0.106 0.694 0.106
-                			emissiveColor 0.116883 0.766234 0.116883
+							diffuseColor 0 0 0
+                			emissiveColor 0 0 1
             			}
             		}
         			geometry IndexedFaceSet {
@@ -183,8 +183,8 @@ Transform {
             		appearance Appearance {
             			material Material {
 							transparency 0.85
-                			diffuseColor 0.239 0.529 0.0235
-                			emissiveColor 0.301980 0.668317 0.029703
+                			diffuseColor 0 0 0
+                			emissiveColor 1 1 1
             			}
             		}
         			geometry IndexedFaceSet {
