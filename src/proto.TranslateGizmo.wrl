@@ -18,76 +18,16 @@ PROTO TranslateGizmo [
 	exposedField  SFVec3f     translation    0 0 0
 	exposedField  SFRotation  rotation       0 1 0 0
 	exposedField  SFVec3f     scale          1 1 1
+
+	# When FALSE, only Y axis is shown
+	exposedField  SFBool      othersVisible  TRUE
+
 	eventOut      SFTime      dragStart
 	eventOut      SFTime      dragEnd
 	eventOut      SFVec3f     delta_changed
 ]{
-	# Translate: single axis
-	DEF selectableX Selection {
-		select TRUE
-		collide FALSE
-		children [
-			DEF touchX TouchSensor {}
-			Transform {
-				translation IS translation
-				rotation IS rotation
-				scale IS scale
-				children [
-					Selection {
-						select FALSE
-						collide FALSE
-						children [
-							Transform {
-								translation 1.1 0 0
-								rotation 0 0 1 -1.57
-								children Shape {
-									appearance Appearance {
-										material DEF coneX Material {
-											diffuseColor 0 0 0
-											emissiveColor 1 0 0
-										}
-									}
-									geometry Cone {
-										bottomRadius 0.05
-										height 0.2
-									}
-								}
-							}
-						]
-					}
-					Shape {
-						appearance Appearance {
-							material Material {
-								diffuseColor 0 0 0
-								emissiveColor 1 0 0
-								transparency 1
-							}
-						}
-						geometry ThickLine {
-							thickness 0.1
-							spine [0 0 0, 1.2 0 0]
-						}
-					}
-					DEF activeX Visible {
-						visible FALSE
-						children Shape {
-							appearance Appearance {
-								material Material {
-									diffuseColor 0 0 0
-									emissiveColor 1 0 0
-									transparency 1
-								}
-							}
-							geometry Box {
-								size 1000 1000 0.1
-							}
-						}
-					}
-				]
-				ROUTE touchX.isActive TO activeX.visible
-			}
-		]
-	}
+
+	# Translate: single axis (Y)
 	DEF selectableY Selection {
 		select TRUE
 		collide FALSE
@@ -152,262 +92,339 @@ PROTO TranslateGizmo [
 			}
 		]
 	}
-	DEF selectableZ Selection {
-		select TRUE
-		collide FALSE
+
+	# Translate: single axis (X, Z)
+	Visible	{
+		visible IS othersVisible
 		children [
-			DEF touchZ TouchSensor {}
-			Transform {
-				translation IS translation
-				rotation IS rotation
-				scale IS scale
+			DEF selectableX Selection {
+				select TRUE
+				collide FALSE
 				children [
-					Selection {
-						select FALSE
-						collide FALSE
+					DEF touchX TouchSensor {}
+					Transform {
+						translation IS translation
+						rotation IS rotation
+						scale IS scale
 						children [
-							Transform {
-								translation 0 0 1.1
-								rotation 1 0 0 1.57
-								children Shape {
-									appearance Appearance {
-										material DEF coneZ Material {
-											diffuseColor 0 0 0
-											emissiveColor 0 0 1
+							Selection {
+								select FALSE
+								collide FALSE
+								children [
+									Transform {
+										translation 1.1 0 0
+										rotation 0 0 1 -1.57
+										children Shape {
+											appearance Appearance {
+												material DEF coneX Material {
+													diffuseColor 0 0 0
+													emissiveColor 1 0 0
+												}
+											}
+											geometry Cone {
+												bottomRadius 0.05
+												height 0.2
+											}
 										}
 									}
-									geometry Cone {
-										bottomRadius 0.05
-										height 0.2
+								]
+							}
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 1 0 0
+										transparency 1
+									}
+								}
+								geometry ThickLine {
+									thickness 0.1
+									spine [0 0 0, 1.2 0 0]
+								}
+							}
+							DEF activeX Visible {
+								visible FALSE
+								children Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0 0 0
+											emissiveColor 1 0 0
+											transparency 1
+										}
+									}
+									geometry Box {
+										size 1000 1000 0.1
 									}
 								}
 							}
 						]
-					}
-					Shape {
-						appearance Appearance {
-							material Material {
-								diffuseColor 0 0 0
-								emissiveColor 0 0 1
-								transparency 1
-							}
-						}
-						geometry ThickLine {
-							thickness 0.1
-							spine [0 0 0, 0 0 1.2]
-						}
-					}
-					DEF activeZ Visible {
-						visible FALSE
-						children Shape {
-							appearance Appearance {
-								material Material {
-									diffuseColor 0 0 0
-									emissiveColor 0 0 1
-									transparency 1
-								}
-							}
-							geometry Box {
-								size 1000 0.1 1000
-							}
-						}
+						ROUTE touchX.isActive TO activeX.visible
 					}
 				]
-				ROUTE touchZ.isActive TO activeZ.visible
+			}
+			DEF selectableZ Selection {
+				select TRUE
+				collide FALSE
+				children [
+					DEF touchZ TouchSensor {}
+					Transform {
+						translation IS translation
+						rotation IS rotation
+						scale IS scale
+						children [
+							Selection {
+								select FALSE
+								collide FALSE
+								children [
+									Transform {
+										translation 0 0 1.1
+										rotation 1 0 0 1.57
+										children Shape {
+											appearance Appearance {
+												material DEF coneZ Material {
+													diffuseColor 0 0 0
+													emissiveColor 0 0 1
+												}
+											}
+											geometry Cone {
+												bottomRadius 0.05
+												height 0.2
+											}
+										}
+									}
+								]
+							}
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 0 0 1
+										transparency 1
+									}
+								}
+								geometry ThickLine {
+									thickness 0.1
+									spine [0 0 0, 0 0 1.2]
+								}
+							}
+							DEF activeZ Visible {
+								visible FALSE
+								children Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0 0 0
+											emissiveColor 0 0 1
+											transparency 1
+										}
+									}
+									geometry Box {
+										size 1000 0.1 1000
+									}
+								}
+							}
+						]
+						ROUTE touchZ.isActive TO activeZ.visible
+					}
+				]
 			}
 		]
 	}
 
 	# Translate: 2D plane
-	DEF selectableXY Selection {
-		select TRUE
-		collide FALSE
+	Visible	{
+		visible IS othersVisible
 		children [
-			DEF touchXY TouchSensor {}
-			Transform {
-				translation IS translation
-				rotation IS rotation
-				scale IS scale
+			DEF selectableXY Selection {
+				select TRUE
+				collide FALSE
 				children [
-					Shape {
-						appearance Appearance {
-							material Material {
-								diffuseColor 0 0 0
-								emissiveColor 1 1 0
-								transparency 1
-							}
-						}
-						geometry IndexedFaceSet {
-							solid FALSE
-							coord Coordinate {point [0 0 0, 0 0.5 0, 0.5 0.5 0, 0.5 0 0]}
-							coordIndex [0 3 2 1 0 -1]
-						}
-					}
-					DEF hoverXY Visible {
-						visible FALSE
-						children Shape {
-							appearance Appearance {
-								material Material {
-									diffuseColor 0 0 0
-									emissiveColor 1 1 0
-									transparency 0.5
+					DEF touchXY TouchSensor {}
+					Transform {
+						translation IS translation
+						rotation IS rotation
+						scale IS scale
+						children [
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 1 1 0
+										transparency 1
+									}
+								}
+								geometry IndexedFaceSet {
+									solid FALSE
+									coord Coordinate {point [0 0 0, 0 0.5 0, 0.5 0.5 0, 0.5 0 0]}
+									coordIndex [0 3 2 1 0 -1]
 								}
 							}
-							geometry IndexedFaceSet {
-								solid FALSE
-								coord Coordinate {point [0 0 0, 0 0.5 0, 0.5 0.5 0, 0.5 0 0]}
-								coordIndex [0 3 2 1 0 -1]
-							}
-						}
-					}
-					DEF activeXY Visible {
-						visible FALSE
-						children Shape {
-							appearance Appearance {
-								material Material {
-									diffuseColor 0 0 0
-									emissiveColor 1 1 0
-									transparency 1
+							DEF hoverXY Visible {
+								visible FALSE
+								children Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0 0 0
+											emissiveColor 1 1 0
+											transparency 0.5
+										}
+									}
+									geometry IndexedFaceSet {
+										solid FALSE
+										coord Coordinate {point [0 0 0, 0 0.5 0, 0.5 0.5 0, 0.5 0 0]}
+										coordIndex [0 3 2 1 0 -1]
+									}
 								}
 							}
-							geometry IndexedFaceSet {
-								solid FALSE
-								coord Coordinate {point [-2000 -2000 0, -2000 2000 0, 2000 2000 0, 2000 -2000 0]}
-								coordIndex [0 3 2 1 0 -1]
+							DEF activeXY Visible {
+								visible FALSE
+								children Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0 0 0
+											emissiveColor 1 1 0
+											transparency 1
+										}
+									}
+									geometry IndexedFaceSet {
+										solid FALSE
+										coord Coordinate {point [-2000 -2000 0, -2000 2000 0, 2000 2000 0, 2000 -2000 0]}
+										coordIndex [0 3 2 1 0 -1]
+									}
+								}
 							}
-						}
+						]
+						ROUTE touchXY.isOver TO hoverXY.visible
+						ROUTE touchXY.isActive TO activeXY.visible
 					}
 				]
-				ROUTE touchXY.isOver TO hoverXY.visible
-				ROUTE touchXY.isActive TO activeXY.visible
 			}
-		]
-	}
-	DEF selectableXZ Selection {
-		select TRUE
-		collide FALSE
-		children [
-			DEF touchXZ TouchSensor {}
-			Transform {
-				translation IS translation
-				rotation IS rotation
-				scale IS scale
+			DEF selectableXZ Selection {
+				select TRUE
+				collide FALSE
 				children [
-					Shape {
-						appearance Appearance {
-							material Material {
-								diffuseColor 0 0 0
-								emissiveColor 1 1 0
-								transparency 1
-							}
-						}
-						geometry IndexedFaceSet {
-							solid FALSE
-							coord Coordinate {point [0 0 0, 0.5 0 0, 0.5 0 0.5, 0 0 0.5]}
-							coordIndex [0 3 2 1 0 -1]
-						}
-					}
-					DEF hoverXZ Visible {
-						visible FALSE
-						children Shape {
-							appearance Appearance {
-								material Material {
-									diffuseColor 0 0 0
-									emissiveColor 1 1 0
-									transparency 0.5
+					DEF touchXZ TouchSensor {}
+					Transform {
+						translation IS translation
+						rotation IS rotation
+						scale IS scale
+						children [
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 1 1 0
+										transparency 1
+									}
+								}
+								geometry IndexedFaceSet {
+									solid FALSE
+									coord Coordinate {point [0 0 0, 0.5 0 0, 0.5 0 0.5, 0 0 0.5]}
+									coordIndex [0 3 2 1 0 -1]
 								}
 							}
-							geometry IndexedFaceSet {
-								solid FALSE
-								coord Coordinate {point [0 0 0, 0.5 0 0, 0.5 0 0.5, 0 0 0.5]}
-								coordIndex [0 3 2 1 0 -1]
-							}
-						}
-					}
-					DEF activeXZ Visible {
-						visible FALSE
-						children Shape {
-							appearance Appearance {
-								material Material {
-									diffuseColor 0 0 0
-									emissiveColor 1 1 0
-									transparency 1
+							DEF hoverXZ Visible {
+								visible FALSE
+								children Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0 0 0
+											emissiveColor 1 1 0
+											transparency 0.5
+										}
+									}
+									geometry IndexedFaceSet {
+										solid FALSE
+										coord Coordinate {point [0 0 0, 0.5 0 0, 0.5 0 0.5, 0 0 0.5]}
+										coordIndex [0 3 2 1 0 -1]
+									}
 								}
 							}
-							geometry IndexedFaceSet {
-								solid FALSE
-								coord Coordinate {point [-2000 0 -2000, 2000 0 -2000, 2000 0 2000, -2000 0 2000]}
-								coordIndex [0 3 2 1 0 -1]
+							DEF activeXZ Visible {
+								visible FALSE
+								children Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0 0 0
+											emissiveColor 1 1 0
+											transparency 1
+										}
+									}
+									geometry IndexedFaceSet {
+										solid FALSE
+										coord Coordinate {point [-2000 0 -2000, 2000 0 -2000, 2000 0 2000, -2000 0 2000]}
+										coordIndex [0 3 2 1 0 -1]
+									}
+								}
 							}
-						}
+						]
+						ROUTE touchXZ.isOver TO hoverXZ.visible
+						ROUTE touchXZ.isActive TO activeXZ.visible
 					}
 				]
-				ROUTE touchXZ.isOver TO hoverXZ.visible
-				ROUTE touchXZ.isActive TO activeXZ.visible
 			}
-		]
-	}
-	DEF selectableYZ Selection {
-		select TRUE
-		collide FALSE
-		children [
-			DEF touchYZ TouchSensor {}
-			Transform {
-				translation IS translation
-				rotation IS rotation
-				scale IS scale
+			DEF selectableYZ Selection {
+				select TRUE
+				collide FALSE
 				children [
-					Shape {
-						appearance Appearance {
-							material Material {
-								diffuseColor 0 0 0
-								emissiveColor 1 1 0
-								transparency 1
-							}
-						}
-						geometry IndexedFaceSet {
-							solid FALSE
-							coord Coordinate {point [0 0 0, 0 0.5 0, 0 0.5 0.5, 0 0 0.5]}
-							coordIndex [0 3 2 1 0 -1]
-						}
-					}
-					DEF hoverYZ Visible {
-						visible FALSE
-						children Shape {
-							appearance Appearance {
-								material Material {
-									diffuseColor 0 0 0
-									emissiveColor 1 1 0
-									transparency 0.5
+					DEF touchYZ TouchSensor {}
+					Transform {
+						translation IS translation
+						rotation IS rotation
+						scale IS scale
+						children [
+							Shape {
+								appearance Appearance {
+									material Material {
+										diffuseColor 0 0 0
+										emissiveColor 1 1 0
+										transparency 1
+									}
+								}
+								geometry IndexedFaceSet {
+									solid FALSE
+									coord Coordinate {point [0 0 0, 0 0.5 0, 0 0.5 0.5, 0 0 0.5]}
+									coordIndex [0 3 2 1 0 -1]
 								}
 							}
-							geometry IndexedFaceSet {
-								solid FALSE
-								coord Coordinate {point [0 0 0, 0 0.5 0, 0 0.5 0.5, 0 0 0.5]}
-								coordIndex [0 3 2 1 0 -1]
-							}
-						}
-					}
-					DEF activeYZ Visible {
-						visible FALSE
-						children Shape {
-							appearance Appearance {
-								material Material {
-									diffuseColor 0 0 0
-									emissiveColor 1 1 0
-									transparency 1
+							DEF hoverYZ Visible {
+								visible FALSE
+								children Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0 0 0
+											emissiveColor 1 1 0
+											transparency 0.5
+										}
+									}
+									geometry IndexedFaceSet {
+										solid FALSE
+										coord Coordinate {point [0 0 0, 0 0.5 0, 0 0.5 0.5, 0 0 0.5]}
+										coordIndex [0 3 2 1 0 -1]
+									}
 								}
 							}
-							geometry IndexedFaceSet {
-								solid FALSE
-								coord Coordinate {point [0 -2000 -2000, 0 2000 -2000, 0 2000 2000, 0 -2000 2000]}
-								coordIndex [0 3 2 1 0 -1]
+							DEF activeYZ Visible {
+								visible FALSE
+								children Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0 0 0
+											emissiveColor 1 1 0
+											transparency 1
+										}
+									}
+									geometry IndexedFaceSet {
+										solid FALSE
+										coord Coordinate {point [0 -2000 -2000, 0 2000 -2000, 0 2000 2000, 0 -2000 2000]}
+										coordIndex [0 3 2 1 0 -1]
+									}
+								}
 							}
-						}
+						]
+						ROUTE touchYZ.isOver TO hoverYZ.visible
+						ROUTE touchYZ.isActive TO activeYZ.visible
 					}
 				]
-				ROUTE touchYZ.isOver TO hoverYZ.visible
-				ROUTE touchYZ.isActive TO activeYZ.visible
 			}
 		]
 	}
@@ -492,7 +509,6 @@ PROTO TranslateGizmo [
 
 		directOutput TRUE
 		url "javascript:
-
 
 		function refreshColors(){
 			if (hoverX) lines.colorIndex = COLORS_X;
