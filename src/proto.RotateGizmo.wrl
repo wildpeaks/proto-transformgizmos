@@ -367,6 +367,9 @@ PROTO RotateGizmo [
 		field         SFInt32     areaX              -1
 		field         SFInt32     areaY              -1
 		field         SFInt32     areaZ              -1
+		field         SFBool      crossedX           FALSE
+		field         SFBool      crossedY           FALSE
+		field         SFBool      crossedZ           FALSE
 
 		directOutput TRUE
 		url "javascript:
@@ -463,54 +466,29 @@ PROTO RotateGizmo [
 			if (activeXY){
 				var angle1 = getAngle(startFrom[1], startFrom[0]);
 				var angle2 = getAngle(hitpointXY[1], hitpointXY[0]);
-
-				var area = getArea(angle1, angle2);
-				trace('AREA ' + area);
-				//
-				// TODO
-				//
-				areaX = area;
-
 				arcXY.fromAngle = angle1;
 				arcXY.toAngle = angle2;
-				var delta = arcXY.toAngle - arcXY.fromAngle;
-				delta_changed = new SFRotation(0, 0, 1, delta);
+				delta_changed = new SFRotation(0, 0, 1, angle2 - angle1);
 			}
 		}
+
 		function hitpointXZ(){
 			if (activeXZ){
 				var angle1 = getAngle(startFrom[2], startFrom[0]);
 				var angle2 = getAngle(hitpointXZ[2], hitpointXZ[0]);
-
-				var area = getArea(angle1, angle2);
-				trace('AREA ' + area);
-				//
-				// TODO
-				//
-				areaX = area;
-
 				arcXZ.fromAngle = angle1;
 				arcXZ.toAngle = angle2;
-				var delta = -1 * (arcXZ.toAngle - arcXZ.fromAngle);
-				delta_changed = new SFRotation(0, 1, 0, delta);
+				delta_changed = new SFRotation(0, 1, 0, -(angle2 - angle1));
 			}
 		}
+
 		function hitpointYZ(){
 			if (activeYZ){
 				var angle1 = getAngle(startFrom[1], -startFrom[2]);
 				var angle2 = getAngle(hitpointYZ[1], -hitpointYZ[2]);
-
-				var area = getArea(angle1, angle2);
-				trace('AREA ' + area);
-				//
-				// TODO
-				//
-				areaX = area;
-
 				arcYZ.fromAngle = angle1;
-				arcYZ.toAngle = angle1;
-				var delta = arcYZ.toAngle - arcYZ.fromAngle;
-				delta_changed = new SFRotation(1, 0, 0, delta);
+				arcYZ.toAngle = angle2;
+				delta_changed = new SFRotation(1, 0, 0, angle2 - angle1);
 			}
 		}
 
