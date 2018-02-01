@@ -3,6 +3,7 @@
 EXTERNPROTO TransformGizmos [
 	exposedField  SFInt32  type
 	exposedField  SFNode   target
+	exposedField  SFBool   onlyY
 	eventIn       SFTime   forceUpdate
 ] "../src/proto.TransformGizmos.wrl#TransformGizmos"
 

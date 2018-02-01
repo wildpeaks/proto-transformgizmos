@@ -678,7 +678,3 @@ PROTO TranslateGizmo [
 	ROUTE touchXZ.hitPoint_changed TO script.hitpointXZ
 	ROUTE touchYZ.hitPoint_changed TO script.hitpointYZ
 }
-
-TranslateGizmo {
-	onlyY TRUE
-}
