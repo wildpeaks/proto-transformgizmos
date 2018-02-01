@@ -4,7 +4,7 @@ EXTERNPROTO TranslateGizmo [
 	exposedField  SFVec3f     translation
 	exposedField  SFRotation  rotation
 	exposedField  SFVec3f     scale
-	exposedField  SFBool      othersVisible
+	exposedField  SFBool      onlyY
 	eventOut      SFTime      dragStart
 	eventOut      SFTime      dragEnd
 	eventOut      SFVec3f     delta_changed
@@ -39,8 +39,8 @@ PROTO TransformGizmos [
 	# Transform-like object that gets edited by the gizmos
 	exposedField  SFNode      target         NULL
 
-	# When FALSE, only Y axis is shown
-	exposedField  SFBool      othersVisible  TRUE
+	# When TRUE, only Y axis is shown
+	exposedField  SFBool      onlyY          FALSE
 
 	# Call this when the target ever changes for another reason than the gizmos
 	eventIn       SFTime      forceUpdate
@@ -49,7 +49,7 @@ PROTO TransformGizmos [
 		children DEF gizmosSwitch Switch {
 			choice [
 				DEF translateGizmo TranslateGizmo{
-					othersVisible IS othersVisible
+					onlyY IS onlyY
 				}
 				DEF rotateGizmo RotateGizmo{}
 			]

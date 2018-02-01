@@ -19,8 +19,8 @@ PROTO TranslateGizmo [
 	exposedField  SFRotation  rotation       0 1 0 0
 	exposedField  SFVec3f     scale          1 1 1
 
-	# When FALSE, only Y axis is shown
-	exposedField  SFBool      othersVisible  TRUE
+	# When TRUE, only Y axis is shown
+	exposedField  SFBool      onlyY          FALSE
 
 	eventOut      SFTime      dragStart
 	eventOut      SFTime      dragEnd
@@ -93,10 +93,11 @@ PROTO TranslateGizmo [
 		]
 	}
 
-	# Translate: single axis (X, Z)
-	Visible	{
-		visible IS othersVisible
+	DEF others Visible {
+		visible	TRUE
 		children [
+
+			# Translate: single axis (X, Z)
 			DEF selectableX Selection {
 				select TRUE
 				collide FALSE
@@ -227,13 +228,8 @@ PROTO TranslateGizmo [
 					}
 				]
 			}
-		]
-	}
 
-	# Translate: 2D plane
-	Visible	{
-		visible IS othersVisible
-		children [
+			# Translate: 2D plane
 			DEF selectableXY Selection {
 				select TRUE
 				collide FALSE
@@ -467,6 +463,12 @@ PROTO TranslateGizmo [
 		field         MFInt32  COLORS_YZ       [0 0 -1, 3 3 -1, 3 3 -1, 0 0 -1, 1 1 -1, 3 3 -1, 3 3 -1, 2 2 -1, 0 0 -1]
 		field         MFInt32  COLORS_XZ       [3 3 -1, 1 1 -1, 3 3 -1, 0 0 -1, 1 1 -1, 1 1 -1, 2 2 -1, 3 3 -1, 3 3 -1]
 
+		field         MFInt32  COORD_ALL       [0 1 -1, 0 2 -1, 0 3 -1, 4 8 -1, 8 5 -1, 5 9 -1, 9 6 -1, 6 7 -1, 7 4 -1]
+		field         MFInt32  COORD_Y         [0 2 -1]
+
+		exposedField  SFBool   onlyY           IS onlyY
+		field         SFNode   others          USE others
+
 		exposedField  SFBool   hoverX          FALSE
 		exposedField  SFBool   hoverY          FALSE
 		exposedField  SFBool   hoverZ          FALSE
@@ -509,6 +511,14 @@ PROTO TranslateGizmo [
 
 		directOutput TRUE
 		url "javascript:
+
+		function onlyY(){
+			others.visible = !onlyY;
+			lines.coordIndex = onlyY ? COORD_Y : COORD_ALL;
+		}
+		function initialize(){
+			onlyY();
+		}
 
 		function refreshColors(){
 			if (hoverX) lines.colorIndex = COLORS_X;
@@ -667,4 +677,8 @@ PROTO TranslateGizmo [
 	ROUTE touchXY.hitPoint_changed TO script.hitpointXY
 	ROUTE touchXZ.hitPoint_changed TO script.hitpointXZ
 	ROUTE touchYZ.hitPoint_changed TO script.hitpointYZ
+}
+
+TranslateGizmo {
+	onlyY TRUE
 }
